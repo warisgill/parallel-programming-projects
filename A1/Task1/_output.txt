@@ -1,0 +1,281 @@
+<  Serial Version Image Blurring >
+Elapsed time: 13.98
+R: 149.659528, G: 148.049722, B: 139.202555
+<Parallel version with 4 threads>
+Elapsed time: 11.76
+R: 149.659528, G: 148.049722, B: 139.202555
+<Parallel version with 8 threads>
+Elapsed time: 8.53
+R: 149.659528, G: 148.049722, B: 139.202555
+<Parallel version with 16 threads>
+Elapsed time: 6.48
+R: 149.659528, G: 148.049722, B: 139.202555
+Running Job...!
+===============================================================================
+===========================time Mon Mar 18 21:05:21 +03 2019 =========================================
+Running compiled binary...
+<  Serial Version Image Blurring >
+Elapsed time: 14.52
+R: 149.659528, G: 148.049722, B: 139.202555
+<< Running Parallel For loop>>
+<<Parallel version with 1 threads>>
+Elapsed time: 33.88
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 2 threads>>
+Elapsed time: 19.48
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 4 threads>>
+Elapsed time: 12.69
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 8 threads>>
+Elapsed time: 9.48
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads>>
+Elapsed time: 6.85
+R: 149.659528, G: 148.049722, B: 139.202555
+Running Job...!
+===============================================================================
+===========================time Mon Mar 18 21:14:23 +03 2019 =========================================
+Running compiled binary...
+<  Serial Version Image Blurring >
+Elapsed time: 13.35
+R: 149.659528, G: 148.049722, B: 139.202555
+<< Running Parallel For loop>>
+<<Parallel version with 1 threads>>
+Elapsed time: 33.81
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 2 threads>>
+Elapsed time: 19.71
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 4 threads>>
+Elapsed time: 12.61
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 8 threads>>
+Elapsed time: 8.85
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads>>
+Elapsed time: 6.87
+R: 149.659528, G: 148.049722, B: 139.202555
+Running Job...!
+===============================================================================
+===========================time Mon Mar 18 21:23:53 +03 2019 =========================================
+Running compiled binary...
+<  Serial Version Image Blurring >
+Elapsed time: 13.49
+R: 149.659528, G: 148.049722, B: 139.202555
+<< Running Parallel For loop>>
+<<Parallel version with 1 threads>>
+Elapsed time: 30.89
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 2 threads>>
+Elapsed time: 17.80
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 4 threads>>
+Elapsed time: 11.51
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 8 threads>>
+Elapsed time: 8.54
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads>>
+Elapsed time: 6.35
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads Compact>>
+Elapsed time: 6.70
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads Scattered>>
+Elapsed time: 6.43
+R: 149.659528, G: 148.049722, B: 139.202555
+===========================Time at start Mon Mar 18 21:26:24 +03 2019 =========================================
+Running Job...!
+Running compiled binary...
+<  Serial Version Image Blurring >
+Elapsed time: 13.49
+R: 149.659528, G: 148.049722, B: 139.202555
+<< Running Parallel For loop>>
+<<Parallel version with 1 threads>>
+Elapsed time: 31.07
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 2 threads>>
+Elapsed time: 17.85
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 4 threads>>
+Elapsed time: 12.48
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 8 threads>>
+Elapsed time: 8.58
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads>>
+Elapsed time: 6.37
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads Compact>>
+Elapsed time: 6.58
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads Scattered>>
+Elapsed time: 6.98
+R: 149.659528, G: 148.049722, B: 139.202555
+===========================Time at end Mon Mar 18 21:28:12 +03 2019 =========================================
+===========================Time at start Mon Mar 18 21:32:25 +03 2019 =========================================
+Running Job...!
+Running compiled binary...
+<  Serial Version Image Blurring >
+Elapsed time: 14.33
+R: 149.659528, G: 148.049722, B: 139.202555
+<< Running Parallel For loop>>
+<<Parallel version with 1 threads>>
+Elapsed time: 35.88
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 2 threads>>
+Elapsed time: 20.57
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 4 threads>>
+Elapsed time: 12.64
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 8 threads>>
+Elapsed time: 8.83
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads>>
+Elapsed time: 7.01
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads Compact>>
+Elapsed time: 6.95
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Parallel version with 16 threads Scattered>>
+Elapsed time: 7.18
+R: 149.659528, G: 148.049722, B: 139.202555
+===========================Time at end Mon Mar 18 21:34:24 +03 2019 =========================================
+===========================Time at start Mon Mar 18 21:40:25 +03 2019 =========================================
+Running Job...!
+Running compiled binary...
+< ********** Serial Version Image Blurring  ************** >
+Elapsed time: 14.30
+R: 149.659528, G: 148.049722, B: 139.202555
+\n << ****************** Running Parallel For loop  *********************>>
+<<Threads = 1 threads
+Elapsed time: 38.25
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 2 threads
+Elapsed time: 21.69
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 4 threads
+Elapsed time: 13.56
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 8 threads
+Elapsed time: 9.12
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 16 threads
+Elapsed time: 7.17
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ***************************  Parallel version with 16 threads Compact **************************>>
+Elapsed time: 7.11
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ************************* Parallel version with 16 threads Scattered  ****************************>>
+Elapsed time: 7.44
+R: 149.659528, G: 148.049722, B: 139.202555
+
+===========================Time at end Mon Mar 18 21:42:30 +03 2019 =========================================
+===========================Time at start Mon Mar 18 22:05:28 +03 2019 =========================================
+Running Job...!
+Running compiled binary...
+< ********** Serial Version Image Blurring  ************** >
+Elapsed time: 14.38
+R: 149.659528, G: 148.049722, B: 139.202555
+\n << ****************** Running Parallel For loop  *********************>>
+<<Threads = 1 threads
+<<Threads = 2 threads
+<<Threads = 4 threads
+<<Threads = 8 threads
+<<Threads = 16 threads
+<<\n ***************************  Parallel version with 16 threads Compact **************************>>
+<<\n ************************* Parallel version with 16 threads Scattered  ****************************>>
+
+===========================Time at end Mon Mar 18 22:06:06 +03 2019 =========================================
+===========================Time at start Mon Mar 18 22:11:59 +03 2019 =========================================
+Running Job...!
+Running compiled binary...
+< ********** Serial Version Image Blurring  ************** >
+Elapsed time: 13.35
+R: 149.659528, G: 148.049722, B: 139.202555
+\n << ****************** Running Parallel For loop  *********************>>
+<<Threads = 1 threads
+Elapsed time: 62.97
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 2 threads
+Elapsed time: 34.00
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 4 threads
+Elapsed time: 20.20
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 8 threads
+Elapsed time: 12.66
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 16 threads
+Elapsed time: 8.96
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ***************************  Parallel version with 16 threads Compact **************************>>
+Elapsed time: 8.78
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ************************* Parallel version with 16 threads Scattered  ****************************>>
+Elapsed time: 8.96
+R: 149.659528, G: 148.049722, B: 139.202555
+
+===========================Time at end Mon Mar 18 22:14:53 +03 2019 =========================================
+===========================Time at start Mon Mar 18 22:38:31 +03 2019 =========================================
+Running Job...!
+Running compiled binary...
+< ********** Serial Version Image Blurring  ************** >
+Elapsed time: 13.60
+R: 149.659528, G: 148.049722, B: 139.202555
+\n << ****************** Running Parallel For loop  *********************>>
+<<Threads = 1 threads
+Elapsed time: 31.49
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 2 threads
+Elapsed time: 17.75
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 4 threads
+Elapsed time: 11.53
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 8 threads
+Elapsed time: 8.36
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 16 threads
+Elapsed time: 6.50
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ***************************  Parallel version with 16 threads Compact **************************>>
+Elapsed time: 7.03
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ************************* Parallel version with 16 threads Scattered  ****************************>>
+Elapsed time: 6.53
+R: 149.659528, G: 148.049722, B: 139.202555
+
+===========================Time at end Mon Mar 18 22:40:18 +03 2019 =========================================
+===========================Time at start Mon Mar 18 22:54:44 +03 2019 =========================================
+Running Job...!
+Running compiled binary...
+< ********** Serial Version Image Blurring  ************** >
+Elapsed time: 14.56
+R: 149.659528, G: 148.049722, B: 139.202555
+\n << ****************** Running Parallel For loop  *********************>>
+<<Threads = 1 threads
+Elapsed time: 34.36
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 2 threads
+Elapsed time: 19.14
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 4 threads
+Elapsed time: 12.20
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 8 threads
+Elapsed time: 8.73
+R: 149.659528, G: 148.049722, B: 139.202555
+<<Threads = 16 threads
+Elapsed time: 7.06
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ***************************  Parallel version with 16 threads Compact **************************>>
+Elapsed time: 7.87
+R: 149.659528, G: 148.049722, B: 139.202555
+<<\n ************************* Parallel version with 16 threads Scattered  ****************************>>
+Elapsed time: 6.70
+R: 149.659528, G: 148.049722, B: 139.202555
+
+===========================Time at end Mon Mar 18 22:56:39 +03 2019 =========================================
