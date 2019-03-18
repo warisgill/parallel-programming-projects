@@ -16,6 +16,7 @@
 ################################################################################
 ##################### !!! DO NOT EDIT ABOVE THIS LINE !!! ######################
 ################################################################################
+
 # Set stack size to unlimited
 echo "Setting stack size to unlimited..."
 ulimit -s unlimited
@@ -49,12 +50,12 @@ echo
 # export KMP_AFFINITY=verbose,granularity=fine,compact
 # ./image_blurring_parallel coffee.png
 
-printf "\n\n"  ./output.txt
-printf "\n\n\n"./output.txt
+printf "\n\n" >> ./output.txt
+printf "\n\n\n" >>./output.txt
 echo "            +++++++++++++++++ Start Time: $(date) ++++++++++++++++++++++++++++" >> ./output.txt
 
 
-printf "\n\n\n Serial Code  \n\n\n" ./output.txt
+printf "\n\n\n Serial Code  \n\n\n" >> ./output.txt
 for image in coffee.png cilek.png
 do
 	echo "< **********Image: $image Serial Version  ************** >" >> ./output.txt
@@ -62,29 +63,30 @@ do
 	./image_blurring $image >> ./output.txt
 done 
 
-printf "\n\n\n Performance under Thread 1,4,8,16, if possible 32 \n\n\n" ./output.txt
+printf "\n\n\n Performance under Thread 1,4,8,16, if possible 32 \n\n\n" >> ./output.txt
 
 for image in coffee.png cilek.png
 do
+	printf "\n\n\n" >> ./output.txt
 	for ((i=1; i<17; i=i*2));
 		do 
-			echo "<<Image: $image Threads = $i threads" >> ./output.txt
+			echo "<<Threads = $i threads" >> ./output.txt
 			export OMP_NUM_THREADS=$i 
 			export KMP_AFFINITY=verbose,granularity=fine,compact
 			./image_blurring_parallel $image >> ./output.txt
 		done	
 done
 
-printf "\n\n\n Thread Binding Test \n\n\n" ./output.txt
+printf "\n\n\n Thread Binding Test \n\n\n" >> ./output.txt
 for image in coffee.png cilek.png
 do
-	echo "<<\n ******Image: $image Parallel version with 16 threads Compact **************************>>" >> ./output.txt
+	echo -e "<<\n ******Image: $image Parallel version with 16 threads Compact **************************>>" >> ./output.txt
 	export OMP_NUM_THREADS=16
 	export KMP_AFFINITY=verbose,granularity=fine,compact 
 	./image_blurring_parallel $image >> ./output.txt
 
 
-	echo "<<\n *******Image: $image Parallel version with 16 threads Scattered  ****************************>>">> ./output.txt
+	echo -e "<<\n *******Image: $image Parallel version with 16 threads Scattered  ****************************>>">> ./output.txt
 	export OMP_NUM_THREADS=16
 	export KMP_AFFINITY=verbose,granularity=fine,scatter
 	./image_blurring_parallel $image >> ./output.txt
@@ -92,6 +94,6 @@ done
 
 
 echo "            ++++++++++++++++++++ End Time: $(date) ++++++++++++++++++++++++++++" >> ./output.txt
-printf "\n\n\n" ./output.txt
+printf "\n\n\n" >> ./output.txt
 
  
