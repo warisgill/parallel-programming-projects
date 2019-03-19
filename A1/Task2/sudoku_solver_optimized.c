@@ -38,7 +38,7 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 	if (row > (box_sz - 1))
 	{
 		*FLAG = 1;
-		// printMatrix(matrix, box_sz);
+		printMatrix(matrix, box_sz);
 		return 1;
 	}
 	if (matrix[row][col] != EMPTY)
