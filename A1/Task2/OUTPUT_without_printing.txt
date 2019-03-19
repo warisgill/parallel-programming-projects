@@ -1,0 +1,61 @@
+
+
+
+            +++++++++++++++++ Start Time: Tue Mar 19 06:29:07 +03 2019 ++++++++++++++++++++++++++++
+
+
+
+ Serial Simple  
+
+
+Serial Elapsed time: 44.19
+Serial Elapsed time: 0.25
+
+
+
+ Serial Optimized  
+
+
+
+
+
+ Performance under Thread 1,4,8,16, if possible 32 
+
+
+<<Threads = 1 threads
+Part2_A Elapsed time: 88.53
+Part2_B: Elapsed time: 44.82
+Part2_C Elapsed time: 0.61
+<<Threads = 2 threads
+Part2_A Elapsed time: 88.96
+Part2_B: Elapsed time: 44.99
+Part2_C Elapsed time: 0.62
+<<Threads = 4 threads
+Part2_A Elapsed time: 85.03
+Part2_B: Elapsed time: 43.04
+Part2_C Elapsed time: 0.65
+<<Threads = 8 threads
+Part2_A Elapsed time: 85.16
+Part2_B: Elapsed time: 43.03
+Part2_C Elapsed time: 0.66
+<<Threads = 16 threads
+Part2_A Elapsed time: 85.46
+Part2_B: Elapsed time: 43.19
+Part2_C Elapsed time: 0.70
+
+
+
+ Thread Binding Test 
+
+
+<<
+ ****** Parallel version with 16 threads Compact **************************>>
+Part2_A Elapsed time: 86.51
+Part2_B: Elapsed time: 42.71
+Part2_C Elapsed time: 0.69
+<<
+ ****** Parallel version with 16 threads Scatter **************************>>
+Part2_A Elapsed time: 85.21
+Part2_B: Elapsed time: 43.48
+Part2_C Elapsed time: 0.67
+            +++++++++++++++++ End Time: Tue Mar 19 06:45:11 +03 2019 ++++++++++++++++++++++++++++

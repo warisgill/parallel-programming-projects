@@ -45,7 +45,7 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
     {
         if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz,depth,MAX_DEPTH))
         {
-            printMatrix(matrix, box_sz);
+            // printMatrix(matrix, box_sz);
         }
     }
     else
@@ -59,7 +59,7 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
                 {
                     matrix[row][col] = num;
                     if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz,depth,MAX_DEPTH)){
-                        printMatrix(matrix, box_sz);
+                        // printMatrix(matrix, box_sz);
                     }
 
                     matrix[row][col] = EMPTY;
@@ -70,7 +70,7 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
             
             
             // add critical section 
-            printf("depth %d \n", *depth);    
+            // printf("depth %d \n", *depth);    
 
             #pragma omp critical
             {
@@ -78,28 +78,50 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 
             }
             
-            #pragma omp parallel
+            // #pragma omp parallel
+            // {
+            //     #pragma omp single
+            //     {
+            //         for (num = 1; num <= box_sz; num++)
+            //         {
+            //             #pragma omp task shared(row,col,box_sz,grid_sz,depth)
+            //             if (canBeFilled(matrix, row, col, num, box_sz, grid_sz))
+            //             {
+            //                 int cb = sizeof(int) * MAX_SIZE * MAX_SIZE;
+            //                 int matrix2[MAX_SIZE][MAX_SIZE];
+            //                 memcpy(matrix2, matrix, cb);
+            //                 matrix2[row][col] = num;
+            //                 #pragma omp task firstprivate(matrix2)
+            //                 if (solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,depth,MAX_DEPTH))
+            //                     printMatrix(matrix2, box_sz);
+
+            //                 //matrix2[row][col] = EMPTY;
+            //             }
+
+            //         }
+            //     }
+            // }
+
+            #pragma omp parallel for schedule(static)
+            for (num = 1; num <= box_sz; num++)
             {
-                #pragma omp single
+
+                if (canBeFilled(matrix, row, col, num, box_sz, grid_sz))
                 {
-                    for (num = 1; num <= box_sz; num++)
-                    {
-                        #pragma omp task shared(row,col,box_sz,grid_sz,depth)
-                        if (canBeFilled(matrix, row, col, num, box_sz, grid_sz))
-                        {
-                            int cb = sizeof(int) * MAX_SIZE * MAX_SIZE;
-                            int matrix2[MAX_SIZE][MAX_SIZE];
-                            memcpy(matrix2, matrix, cb);
-                            matrix2[row][col] = num;
-                            #pragma omp task firstprivate(matrix2)
-                            if (solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,depth,MAX_DEPTH))
-                                printMatrix(matrix2, box_sz);
-
-                            //matrix2[row][col] = EMPTY;
-                        }
-
-                    }
+                    int cb = sizeof(int) * MAX_SIZE * MAX_SIZE;
+                    int matrix2[MAX_SIZE][MAX_SIZE];
+                    memcpy(matrix2, matrix, cb);
+                    
+                    matrix2[row][col] = num;
+                    
+                    // #pragma omp task firstprivate(matrix2)
+                     if (solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,depth,MAX_DEPTH)){
+                        // printMatrix(matrix2, box_sz);
+                     }
+                        
+                    //matrix2[row][col] = EMPTY;
                 }
+                           
             }
             
         }
@@ -173,7 +195,7 @@ int main(int argc, char const *argv[])
     
     double time1 = omp_get_wtime();
     int depth=0;
-    int MAX_DEPTH =5;
+    int MAX_DEPTH =6;
     if (argc < 3)
     {
         printf("Please specify matrix size and the CSV file name as inputs.\n");
@@ -197,8 +219,8 @@ int main(int argc, char const *argv[])
     readCSV(box_sz, filename, matrix);
 
     solveSudoku(0, 0, matrix, box_sz, grid_sz, &depth, MAX_DEPTH);
-    printf("Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
-    printf("===================Elapsed time: %0.2lf, Sudko Size= %s, File name = %s, Depth= %d=============================\n",omp_get_wtime() - time1,argv[1],argv[2],MAX_DEPTH);
+    printf("Part2_B: Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
+    // printf("Part2_B=================== Elapsed time: %0.2lf, Sudko Size= %s, File name = %s, Depth= %d=============================\n",omp_get_wtime() - time1,argv[1],argv[2],MAX_DEPTH);
     
     return 0;
 }

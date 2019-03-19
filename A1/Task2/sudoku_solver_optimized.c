@@ -24,8 +24,11 @@ void printMatrix(int matrix[MAX_SIZE][MAX_SIZE], int box_sz)
 	}
 }
 
-int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, int grid_sz)
+int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, int grid_sz, int *FLAG)
 {
+	 if(*FLAG==1){
+        return 1;
+    }
 
 	if (col > (box_sz - 1))
 	{
@@ -34,14 +37,24 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 	}
 	if (row > (box_sz - 1))
 	{
+		*FLAG = 1;
+		// printMatrix(matrix, box_sz);
 		return 1;
 	}
 	if (matrix[row][col] != EMPTY)
 	{
-		if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz))
-		{
-			// printMatrix(matrix, box_sz);
-		}
+		// if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz,FLAG))
+		// {
+		// 	printMatrix(matrix, box_sz);
+		// }
+
+		if(*FLAG==1){
+            return 1;
+        }
+
+
+		return solveSudoku(row, col + 1, matrix, box_sz, grid_sz,FLAG);
+
 	}
 	else
 	{
@@ -52,11 +65,9 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 			{
 				matrix[row][col] = num;
 
-				if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz)){
-					// printMatrix(matrix, box_sz);
-
-				}
-
+				// if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz,FLAG))
+				// 	printMatrix(matrix, box_sz);
+				solveSudoku(row, col + 1, matrix, box_sz, grid_sz,FLAG);
 				matrix[row][col] = EMPTY;
 			}
 		}
@@ -126,6 +137,7 @@ void readCSV(int box_sz, char *filename, int matrix[MAX_SIZE][MAX_SIZE])
 int main(int argc, char const *argv[])
 {
 	double time1 = omp_get_wtime();
+	 int FLAG = 0;
 	if (argc < 3)
 	{
 		printf("Please specify matrix size and the CSV file name as inputs.\n");
@@ -141,7 +153,7 @@ int main(int argc, char const *argv[])
 
 	readCSV(box_sz, filename, matrix);
 
-	solveSudoku(0, 0, matrix, box_sz, grid_sz);
+	solveSudoku(0, 0, matrix, box_sz, grid_sz, &FLAG);
 	printf("Serial Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
 	return 0;
 }

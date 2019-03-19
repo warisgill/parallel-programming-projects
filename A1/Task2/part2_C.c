@@ -45,9 +45,17 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 
     if (row > (box_sz - 1))
     {
+
+        if(*FLAG==1){
+            return 1;
+        }
+
         #pragma omp critical
-        *FLAG = 1;
-        printMatrix(matrix, box_sz);
+        {
+            *FLAG = 1;
+        }
+        
+        // printMatrix(matrix, box_sz);
         return 1;
     }
 
@@ -74,7 +82,7 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
                     
                     matrix2[row][col] = num;
                     
-                    #pragma omp task firstprivate(matrix2)
+                    // #pragma omp task firstprivate(matrix2)
                     solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,FLAG);
                         
                     //matrix2[row][col] = EMPTY;
@@ -166,6 +174,7 @@ int main(int argc, char const *argv[])
     readCSV(box_sz, filename, matrix);
 
     solveSudoku(0, 0, matrix, box_sz, grid_sz, &FLAG);
-    printf("Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
+    printf("Part2_C Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
+    // printf("Part2_C===================Elapsed time: %0.2lf, Sudko Size= %s, File name = %s\n",omp_get_wtime() - time1,argv[1],argv[2]);
     return 0;
 }
