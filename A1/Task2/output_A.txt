@@ -1,0 +1,45 @@
++++++++++++++++++ Start Test Time : Fri Mar 22 17:22:04 +03 2019 ++++++++++++++++++++++++++++
+\<<Parallel Time>>Threads = 1
+Part2_A Elapsed time: 102.29
+Threads = 2
+Part2_A Elapsed time: 84.13
+Threads = 4
+Part2_A Elapsed time: 39.15
+Threads = 8
+Part2_A Elapsed time: 20.48
+Threads = 16
+Part2_A Elapsed time: 25.68
+
+
+<<Scatter Vs Compact>>
+
+Compact
+Part2_A Elapsed time: 30.82
+Scattered
+Part2_A Elapsed time: 26.86
+++++++++++++++++++++ End Test Time: Fri Mar 22 17:30:34 +03 2019 ++++++++++++++++++++++++++++
+
+
+
+
+
++++++++++++++++++ Start Test Time : Fri Mar 22 17:39:46 +03 2019 ++++++++++++++++++++++++++++
+\<<Parallel Time>>Threads = 1
+Part2_A Elapsed time: 109.33
+Threads = 2
+Part2_A Elapsed time: 84.98
+Threads = 4
+Part2_A Elapsed time: 43.45
+Threads = 8
+Part2_A Elapsed time: 22.51
+Threads = 16
+Part2_A Elapsed time: 27.89
+
+
+<<Scatter Vs Compact>>
+
+Compact
+Part2_A Elapsed time: 24.92
+Scattered
+Part2_A Elapsed time: 26.14
+++++++++++++++++++++ End Test Time: Fri Mar 22 17:48:37 +03 2019 ++++++++++++++++++++++++++++

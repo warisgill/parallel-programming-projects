@@ -24,7 +24,7 @@ ulimit -a
 echo
 
 
-echo "+++++++++++++++++ Start Test Time : $(date)  <Schedule is static 32 job is halted> ++++++++++++++++++++++++++++" >> ./output.txt
+echo "+++++++++++++++++ Start Test Time : $(date)  <Final Data> ++++++++++++++++++++++++++++" >> ./output.txt
 printf "<<Serial Time>>\n" >> ./output.txt
 for image in coffee.png cilek.png
 do

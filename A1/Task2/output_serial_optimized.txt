@@ -1,0 +1,8 @@
++++++++++++++++++ Start Test Time : Fri Mar 22 17:22:04 +03 2019 ++++++++++++++++++++++++++++
+<<Serial Optimized>>Optimised Serial Elapsed time: 0.32
+++++++++++++++++++++ End Test Time: Fri Mar 22 17:30:34 +03 2019 ++++++++++++++++++++++++++++
+
+
++++++++++++++++++ Start Test Time : Fri Mar 22 17:39:46 +03 2019 ++++++++++++++++++++++++++++
+<<Serial Optimized>>Optimised Serial Elapsed time: 0.36
+++++++++++++++++++++ End Test Time: Fri Mar 22 17:48:37 +03 2019 ++++++++++++++++++++++++++++

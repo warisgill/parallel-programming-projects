@@ -1,40 +1,40 @@
 +++++++++++++++++ Start Test Time : Fri Mar 22 17:22:04 +03 2019 ++++++++++++++++++++++++++++
 \<<Parallel Time>>Threads = 1
-Part2_B Elapsed time: 55.28
+Part2_C Elapsed time: 0.68
 Threads = 2
-Part2_B Elapsed time: 29.24
+Part2_C Elapsed time: 0.78
 Threads = 4
-Part2_B Elapsed time: 14.94
+Part2_C Elapsed time: 0.90
 Threads = 8
-Part2_B Elapsed time: 7.51
+Part2_C Elapsed time: 0.98
 Threads = 16
-Part2_B Elapsed time: 3.90
+Part2_C Elapsed time: 1.74
 
 
 <<Scatter Vs Compact>>
 
 Compact
-Part2_B Elapsed time: 3.89
+Part2_C Elapsed time: 4.25
 Scattered
-Part2_B Elapsed time: 3.90
+Part2_C Elapsed time: 1.08
 ++++++++++++++++++++ End Test Time: Fri Mar 22 17:30:34 +03 2019 ++++++++++++++++++++++++++++
 +++++++++++++++++ Start Test Time : Fri Mar 22 17:39:46 +03 2019 ++++++++++++++++++++++++++++
 \<<Parallel Time>>Threads = 1
-Part2_B Elapsed time: 59.92
+Part2_C Elapsed time: 0.72
 Threads = 2
-Part2_B Elapsed time: 31.38
+Part2_C Elapsed time: 0.82
 Threads = 4
-Part2_B Elapsed time: 16.53
+Part2_C Elapsed time: 0.89
 Threads = 8
-Part2_B Elapsed time: 8.57
+Part2_C Elapsed time: 0.96
 Threads = 16
-Part2_B Elapsed time: 4.35
+Part2_C Elapsed time: 2.11
 
 
 <<Scatter Vs Compact>>
 
 Compact
-Part2_B Elapsed time: 4.38
+Part2_C Elapsed time: 1.02
 Scattered
-Part2_B Elapsed time: 4.32
+Part2_C Elapsed time: 0.79
 ++++++++++++++++++++ End Test Time: Fri Mar 22 17:48:37 +03 2019 ++++++++++++++++++++++++++++

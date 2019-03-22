@@ -1,0 +1,6 @@
+File name = 4x4_hard_1.csv
+Part2_B Elapsed time: 3.41
+File name = 4x4_hard_2.csv
+Part2_B Elapsed time: 5.95
+File name = 4x4_hard_3.csv
+Part2_B Elapsed time: 6.34

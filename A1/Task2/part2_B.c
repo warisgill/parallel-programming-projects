@@ -15,9 +15,7 @@ int canBeFilled(int matrix[MAX_SIZE][MAX_SIZE], int row, int col, int num, int b
 void printMatrix(int matrix[MAX_SIZE][MAX_SIZE], int box_sz)
 {
     
-    int a;
-    a = 0;
-   printf("solution matrix\n");
+    printf("solution matrix\n");
     int row, col;
     for (row = 0; row < box_sz; row++)
     {
