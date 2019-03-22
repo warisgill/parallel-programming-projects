@@ -15,6 +15,8 @@ int canBeFilled(int matrix[MAX_SIZE][MAX_SIZE], int row, int col, int num, int b
 void printMatrix(int matrix[MAX_SIZE][MAX_SIZE], int box_sz)
 {
     
+    int a;
+    a = 0;
    printf("solution matrix\n");
     int row, col;
     for (row = 0; row < box_sz; row++)
@@ -26,63 +28,51 @@ void printMatrix(int matrix[MAX_SIZE][MAX_SIZE], int box_sz)
 }
 
 
-int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, int grid_sz)
-{
-        
+int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, int grid_sz, int depth){
     
-    if (col > (box_sz - 1))
-    {
+    if (col > (box_sz - 1)){
         col = 0;
         row++;
     }
 
-    if (row > (box_sz - 1))
-    {
+    if (row > (box_sz - 1)){
         return 1;
     }
+
     if (matrix[row][col] != EMPTY){        
-        // #pragma omp task firstprivate(row,col) shared(box_sz, grid_sz)
-        if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz)){
+        if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz,depth)){
             printMatrix(matrix, box_sz);
         }
-    }
-    else{
-        /*
-            Depth condition 
-        */
+    }else{
         int num;
-        if(row<row/4){		
+        if(row <= 4){		
+            for (num = 1; num <= box_sz; num++){
+                if(canBeFilled(matrix, row, col, num, box_sz, grid_sz)){
+                    int cb = sizeof(int) * MAX_SIZE * MAX_SIZE;
+                    int matrix2[MAX_SIZE][MAX_SIZE];
+                    memcpy(matrix2, matrix, cb);
+                    matrix2[row][col] = num;
+                    
+                    #pragma omp task firstprivate(matrix2)
+                    if (solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,depth)){
+                        printMatrix(matrix2, box_sz);
+                    }
+                
+                }        
+            }
+        }else{
             for (num = 1; num <= box_sz; num++){
                 if (canBeFilled(matrix, row, col, num, box_sz, grid_sz)){
                     matrix[row][col] = num;
-                    if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz)){
+                    if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz,depth)){
                         printMatrix(matrix, box_sz);
                     }
                     matrix[row][col] = EMPTY;
                 }
             }
-        } else{
-            for (num = 1; num <= box_sz; num++){
-                if(canBeFilled(matrix, row, col, num, box_sz, grid_sz)){
-                    #pragma omp task firstprivate(row,col,num) shared(box_sz, grid_sz)
-                    {
-                        int cb = sizeof(int) * MAX_SIZE * MAX_SIZE;
-                        int matrix2[MAX_SIZE][MAX_SIZE];
-                        memcpy(matrix2, matrix, cb);
-                        matrix2[row][col] = num;
-                        if (solveSudoku(row, col + 1, matrix2, box_sz, grid_sz)){
-                            printMatrix(matrix2, box_sz);
-                        }
-                    }
-                    
-                    //matrix2[row][col] = EMPTY;
-                }        
-            }
-            #pragma omp taskwait
-        }
-            
+        }    
     }
-
+    
     return 0;
 }
 
@@ -154,23 +144,32 @@ int main(int argc, char const *argv[])
         exit(0);
     }
 
+    // int depth =  atoi(argv[3]);    
+    // if (argc >= 3)
+    // {
+    //     printf("Please specify matrix size and the CSV file name as inputs.\n");
+    //     exit(0);
+    //     depth =  atoi(argv[3]);
+    // }
+
+
+
     int box_sz = atoi(argv[1]);
     int grid_sz = sqrt(box_sz);
     char filename[256];
     strcpy(filename, argv[2]);
 
     int matrix[MAX_SIZE][MAX_SIZE];
-
     readCSV(box_sz, filename, matrix);
+
+
     #pragma omp parallel
     {
         #pragma omp single
         {
-            #pragma omp task
-            solveSudoku(0, 0, matrix, box_sz, grid_sz);
+            #pragma omp taskgroup
+            solveSudoku(0, 0, matrix, box_sz, grid_sz, 0);
         }
-
-        #pragma omp taskwait
     }
 
     printf("Part2_B Elapsed time: %0.2lf\n", omp_get_wtime() - time1);

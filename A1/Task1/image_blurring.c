@@ -133,8 +133,8 @@ int main(int argc, char const *argv[]) {
     char output_filename[50];
     sprintf(output_filename, "blurred_%s", argv[1]);
     saveImage(output_image, output_filename, width, height);
-    printf("Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
-
+    // printf("Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
+    printf("Image: %s, Elapsed time: %0.2lf\n",argv[1],omp_get_wtime() - time1);
     //for debugging purpose
     averageRGB(output_image, width, height);
     return 0;

@@ -154,6 +154,6 @@ int main(int argc, char const *argv[])
 	readCSV(box_sz, filename, matrix);
 
 	solveSudoku(0, 0, matrix, box_sz, grid_sz, &FLAG);
-	printf("Serial Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
+	printf("Optimised Serial Elapsed time: %0.2lf\n", omp_get_wtime() - time1);
 	return 0;
 }

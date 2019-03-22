@@ -40,7 +40,7 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 	{
 		if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz))
 		{
-			// printMatrix(matrix, box_sz);
+			printMatrix(matrix, box_sz);
 		}
 	}
 	else
@@ -53,7 +53,7 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 				matrix[row][col] = num;
 
 				if (solveSudoku(row, col + 1, matrix, box_sz, grid_sz)){
-					// printMatrix(matrix, box_sz);
+					printMatrix(matrix, box_sz);
 
 				}
 

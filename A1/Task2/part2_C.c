@@ -35,13 +35,11 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
 		row++;
 	}
 
+    // critical chunk
 	if (row > (box_sz - 1)){
-		// *FLAG = 1;
-
         if(*FLAG==1){
             return 1;
         }
-
         #pragma omp critical
         {
             *FLAG = 1;
@@ -61,24 +59,16 @@ int solveSudoku(int row, int col, int matrix[MAX_SIZE][MAX_SIZE], int box_sz, in
         int num;
         for (num = 1; num <= box_sz; num++){
             if(canBeFilled(matrix, row, col, num, box_sz, grid_sz)){
-                #pragma omp task firstprivate(row,col,num) shared(box_sz, grid_sz)
-                {
-                    int cb = sizeof(int) * MAX_SIZE * MAX_SIZE;
-                    int matrix2[MAX_SIZE][MAX_SIZE];
-                    memcpy(matrix2, matrix, cb);
-                    matrix2[row][col] = num;
-                    // if (solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,FLAG)){
-                    //     printMatrix(matrix2, box_sz);
-                    // }
-                    solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,FLAG);
-                }
-                
-                //matrix2[row][col] = EMPTY;
+               
+                int cb = sizeof(int) * MAX_SIZE * MAX_SIZE;
+                int matrix2[MAX_SIZE][MAX_SIZE];
+                memcpy(matrix2, matrix, cb);
+                matrix2[row][col] = num;
+                #pragma omp task firstprivate(matrix2)
+                solveSudoku(row, col + 1, matrix2, box_sz, grid_sz,FLAG);
             }        
-        }
-        #pragma omp taskwait
+        } 
 	}
-
 	return 0;
 }
 
@@ -163,11 +153,10 @@ int main(int argc, char const *argv[])
     {
         #pragma omp single
         {
-            #pragma omp task
-            solveSudoku(0, 0, matrix, box_sz, grid_sz, &FLAG);
+            #pragma omp taskgroup
+            solveSudoku(0, 0, matrix, box_sz, grid_sz, &FLAG);           
+        
         }
-
-        #pragma omp taskwait
     }
 
     printf("Part2_C Elapsed time: %0.2lf\n", omp_get_wtime() - time1);

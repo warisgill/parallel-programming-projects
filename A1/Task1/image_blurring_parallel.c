@@ -19,7 +19,7 @@ double **getGaussian(int width, int height, double sigma)
 
     #pragma omp parallel
     {
-        #pragma omp for collapse(2) reduction(+: sum)
+        #pragma omp for collapse(2) reduction(+: sum) schedule(static)
         for (i = 0; i < height; i++)
         {
             for (j = 0; j < width; j++)
@@ -29,7 +29,7 @@ double **getGaussian(int width, int height, double sigma)
             }
         }
 
-        #pragma omp for collapse(2)
+        #pragma omp for collapse(2) schedule(static)
         for (i = 0; i < height; i++)
         {
             for (j = 0; j < width; j++)
@@ -63,7 +63,7 @@ double ***loadImage(const char *filename, int *width, int *height)
         imageMatrix[2][h] = (double *)malloc((*width * 3) * sizeof(double));
     }
 
-    #pragma omp parallel for collapse(2) private(h, w)
+    #pragma omp parallel for collapse(2) private(h, w) schedule(static)
     for (h = 0; h < *height; h++)
     {
         for (w = 0; w < *width; w++)
@@ -84,7 +84,7 @@ void saveImage(double ***imageMatrix, const char *filename, int width, int heigh
 
     int h, w;
 
-    #pragma omp parallel for collapse(2) private(h, w)
+    #pragma omp parallel for collapse(2) private(h, w) schedule(static)
     for (h = 0; h < height; h++)
     {
         for (w = 0; w < width; w++)
@@ -130,7 +130,7 @@ double ***applyFilter(double ***image, double **filter, int width, int height, i
         newImage[2][h] = (double *)malloc((width * 3) * sizeof(double));
     }
 
-    #pragma omp parallel for collapse(3)
+    #pragma omp parallel for collapse(3) schedule(static)
     for (d = 0; d < 3; d++)
     {
         for (i = 0; i < newImageHeight; i++)
@@ -169,7 +169,7 @@ void averageRGB(double ***image, int width, int height)
     #pragma omp parallel
     {
         #pragma omp for nowait collapse(2) private(i, j) reduction(+ \
-                                                    : sum[0])
+                                                    : sum[0]) schedule(static)
         for (j = 0; j < height; j++)
         {
             for (k = 0; k < width; k++)
@@ -179,7 +179,7 @@ void averageRGB(double ***image, int width, int height)
         }
 
         #pragma omp for nowait collapse(2) private(i, j) reduction(+ \
-                                                    : sum[1])
+                                                    : sum[1]) schedule(static)
         for (j = 0; j < height; j++)
         {
             for (k = 0; k < width; k++)
@@ -189,7 +189,7 @@ void averageRGB(double ***image, int width, int height)
         }
 
         #pragma omp for nowait collapse(2) private(i, j) reduction(+ \
-                                                    : sum[2])
+                                                    : sum[2]) schedule(static)
         for (j = 0; j < height; j++)
         {
             for (k = 0; k < width; k++)

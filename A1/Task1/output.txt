@@ -1,168 +1,173 @@
-
-
-
-
-
-            +++++++++++++++++ Start Time: Tue Mar 19 02:02:09 +03 2019 ++++++++++++++++++++++++++++
-
-
-
- Serial Code  
-
-
-< **********Image: coffee.png Serial Version  ************** >
-Elapsed time: 17.50
++++++++++++++++++ Start Test Time : Fri Mar 22 00:00:39 +03 2019 ++++++++++++++++++++++++++++
+<<Serial Time>>
+Elapsed time: 17.53
 R: 149.659528, G: 148.049722, B: 139.202555
-< **********Image: cilek.png Serial Version  ************** >
-Elapsed time: 33.63
+Elapsed time: 33.90
 R: 151.594597, G: 49.390452, B: 71.300356
 
+<<Parallel Time>>
 
-
- Performance under Thread 1,4,8,16, if possible 32 
-
-
-<<Image: coffee.png Threads = 1 threads
-Elapsed time: 38.17
+Threads = 1
+Image: coffee.png, Elapsed time: 38.32
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Image: coffee.png Threads = 2 threads
-Elapsed time: 21.76
+Threads = 2
+Image: coffee.png, Elapsed time: 21.63
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Image: coffee.png Threads = 4 threads
-Elapsed time: 13.45
+Threads = 4
+Image: coffee.png, Elapsed time: 13.52
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Image: coffee.png Threads = 8 threads
-Elapsed time: 9.29
+Threads = 8
+Image: coffee.png, Elapsed time: 9.31
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Image: coffee.png Threads = 16 threads
-Elapsed time: 7.34
+Threads = 16
+Image: coffee.png, Elapsed time: 7.40
 R: 149.659528, G: 148.049722, B: 139.202555
 
 
-<<Image: cilek.png Threads = 1 threads
-Elapsed time: 68.37
+Threads = 1
+Image: cilek.png, Elapsed time: 68.70
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Image: cilek.png Threads = 2 threads
-Elapsed time: 38.99
+Threads = 2
+Image: cilek.png, Elapsed time: 39.10
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Image: cilek.png Threads = 4 threads
-Elapsed time: 24.62
+Threads = 4
+Image: cilek.png, Elapsed time: 24.74
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Image: cilek.png Threads = 8 threads
-Elapsed time: 17.21
+Threads = 8
+Image: cilek.png, Elapsed time: 17.35
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Image: cilek.png Threads = 16 threads
-Elapsed time: 14.10
+Threads = 16
+Image: cilek.png, Elapsed time: 14.22
 R: 151.594597, G: 49.390452, B: 71.300356
 
 
+ <<Scatter Vs Compact>> 
 
- Thread Binding Test 
-
-
-<<
- ******Image: coffee.png Parallel version with 16 threads Compact **************************>>
-Elapsed time: 7.38
+Compact
+Image: coffee.png, Elapsed time: 7.40
 R: 149.659528, G: 148.049722, B: 139.202555
-<<
- *******Image: coffee.png Parallel version with 16 threads Scattered  ****************************>>
-Elapsed time: 7.43
+Scattered
+Image: coffee.png, Elapsed time: 7.43
 R: 149.659528, G: 148.049722, B: 139.202555
-<<
- ******Image: cilek.png Parallel version with 16 threads Compact **************************>>
-Elapsed time: 14.17
+Compact
+Image: cilek.png, Elapsed time: 14.12
 R: 151.594597, G: 49.390452, B: 71.300356
-<<
- *******Image: cilek.png Parallel version with 16 threads Scattered  ****************************>>
-Elapsed time: 14.05
+Scattered
+Image: cilek.png, Elapsed time: 14.06
 R: 151.594597, G: 49.390452, B: 71.300356
-            ++++++++++++++++++++ End Time: Tue Mar 19 02:08:07 +03 2019 ++++++++++++++++++++++++++++
+++++++++++++++++++++ End Test Time: Fri Mar 22 00:06:39 +03 2019 ++++++++++++++++++++++++++++
 
-
-
-
-
-
-
-
-            +++++++++++++++++ Start Time: Tue Mar 19 02:31:06 +03 2019 ++++++++++++++++++++++++++++
-
-
-
- Serial Code  
-
-
-< **********Image: coffee.png Serial Version  ************** >
-Elapsed time: 14.66
++++++++++++++++++ Start Test Time : Fri Mar 22 00:18:53 +03 2019 ++++++++++++++++++++++++++++
+<<Serial Time>>
+Elapsed time: 17.71
 R: 149.659528, G: 148.049722, B: 139.202555
-< **********Image: cilek.png Serial Version  ************** >
-Elapsed time: 27.67
+Elapsed time: 34.93
 R: 151.594597, G: 49.390452, B: 71.300356
 
+<<Parallel Time>>
 
-
- Performance under Thread 1,4,8,16, if possible 32 
-
-
-
-
-
-<<Threads = 1 threads
-Image: coffee.png, Elapsed time: 33.90
+Threads = 1
+Image: coffee.png, Elapsed time: 38.29
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Threads = 2 threads
-Image: coffee.png, Elapsed time: 19.21
+Threads = 2
+Image: coffee.png, Elapsed time: 21.66
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Threads = 4 threads
-Image: coffee.png, Elapsed time: 12.15
+Threads = 4
+Image: coffee.png, Elapsed time: 13.62
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Threads = 8 threads
-Image: coffee.png, Elapsed time: 8.89
+Threads = 8
+Image: coffee.png, Elapsed time: 9.32
 R: 149.659528, G: 148.049722, B: 139.202555
-<<Threads = 16 threads
-Image: coffee.png, Elapsed time: 6.83
+Threads = 16
+Image: coffee.png, Elapsed time: 7.34
 R: 149.659528, G: 148.049722, B: 139.202555
 
 
-
-<<Threads = 1 threads
-Image: cilek.png, Elapsed time: 58.95
+Threads = 1
+Image: cilek.png, Elapsed time: 68.57
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Threads = 2 threads
-Image: cilek.png, Elapsed time: 34.68
+Threads = 2
+Image: cilek.png, Elapsed time: 39.08
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Threads = 4 threads
-Image: cilek.png, Elapsed time: 23.00
+Threads = 4
+Image: cilek.png, Elapsed time: 24.83
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Threads = 8 threads
-Image: cilek.png, Elapsed time: 16.02
+Threads = 8
+Image: cilek.png, Elapsed time: 17.37
 R: 151.594597, G: 49.390452, B: 71.300356
-<<Threads = 16 threads
-Image: cilek.png, Elapsed time: 12.66
+Threads = 16
+Image: cilek.png, Elapsed time: 14.16
 R: 151.594597, G: 49.390452, B: 71.300356
 
-
-
- Thread Binding Test 
-
-
-<<
- ******Image: coffee.png Parallel version with 16 threads Compact **************************>>
-Image: coffee.png, Elapsed time: 6.53
+<<Scatter Vs Compact>> 
+Compact
+Image: coffee.png, Elapsed time: 7.43
 R: 149.659528, G: 148.049722, B: 139.202555
-<<
- *******Image: coffee.png Parallel version with 16 threads Scattered  ****************************>>
-Image: coffee.png, Elapsed time: 6.93
+Scattered
+Image: coffee.png, Elapsed time: 7.35
 R: 149.659528, G: 148.049722, B: 139.202555
-<<
- ******Image: cilek.png Parallel version with 16 threads Compact **************************>>
-Image: cilek.png, Elapsed time: 12.51
+Compact
+Image: cilek.png, Elapsed time: 14.18
 R: 151.594597, G: 49.390452, B: 71.300356
-<<
- *******Image: cilek.png Parallel version with 16 threads Scattered  ****************************>>
-Image: cilek.png, Elapsed time: 12.89
+Scattered
+Image: cilek.png, Elapsed time: 14.18
 R: 151.594597, G: 49.390452, B: 71.300356
-            ++++++++++++++++++++ End Time: Tue Mar 19 02:36:24 +03 2019 ++++++++++++++++++++++++++++
+++++++++++++++++++++ End Test Time: Fri Mar 22 00:24:55 +03 2019 ++++++++++++++++++++++++++++
+
++++++++++++++++++ Start Test Time : Fri Mar 22 01:09:09 +03 2019  <Schedule is static 32 job is halted> ++++++++++++++++++++++++++++
+<<Serial Time>>
+Image: coffee.png, Elapsed time: 14.92
+R: 149.659528, G: 148.049722, B: 139.202555
+Image: cilek.png, Elapsed time: 33.23
+R: 151.594597, G: 49.390452, B: 71.300356
+
+<<Parallel Time>>
+
+Threads = 1
+Image: coffee.png, Elapsed time: 31.74
+R: 149.659528, G: 148.049722, B: 139.202555
+Threads = 2
+Image: coffee.png, Elapsed time: 18.40
+R: 149.659528, G: 148.049722, B: 139.202555
+Threads = 4
+Image: coffee.png, Elapsed time: 12.10
+R: 149.659528, G: 148.049722, B: 139.202555
+Threads = 8
+Image: coffee.png, Elapsed time: 8.24
+R: 149.659528, G: 148.049722, B: 139.202555
+Threads = 16
+Image: coffee.png, Elapsed time: 6.61
+R: 149.659528, G: 148.049722, B: 139.202555
 
 
+Threads = 1
+Image: cilek.png, Elapsed time: 57.27
+R: 151.594597, G: 49.390452, B: 71.300356
+Threads = 2
+Image: cilek.png, Elapsed time: 33.40
+R: 151.594597, G: 49.390452, B: 71.300356
+Threads = 4
+Image: cilek.png, Elapsed time: 21.98
+R: 151.594597, G: 49.390452, B: 71.300356
+Threads = 8
+Image: cilek.png, Elapsed time: 15.42
+R: 151.594597, G: 49.390452, B: 71.300356
+Threads = 16
+Image: cilek.png, Elapsed time: 12.36
+R: 151.594597, G: 49.390452, B: 71.300356
+
+<<Scatter Vs Compact>> 
+Compact
+Image: coffee.png, Elapsed time: 6.40
+R: 149.659528, G: 148.049722, B: 139.202555
+Scattered
+Image: coffee.png, Elapsed time: 6.57
+R: 149.659528, G: 148.049722, B: 139.202555
+Compact
+Image: cilek.png, Elapsed time: 12.39
+R: 151.594597, G: 49.390452, B: 71.300356
+Scattered
+Image: cilek.png, Elapsed time: 12.41
+R: 151.594597, G: 49.390452, B: 71.300356
+++++++++++++++++++++ End Test Time: Fri Mar 22 01:14:23 +03 2019 ++++++++++++++++++++++++++++
 
