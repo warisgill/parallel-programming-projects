@@ -380,9 +380,10 @@ int main(int argc, char **argv)
     MPI_Request req1;
     MPI_Request req2;
     MPI_Status stat;
-    px = 2;
-    py = 2;
-    // cmdLine(argc, argv, T, n, px, py, plot_freq, no_comm, num_threads);
+    // px = 2;
+    // py = 2;
+    
+    cmdLine(argc, argv, T, n, px, py, plot_freq, no_comm, num_threads);
     
     m = n;
     int i = 0;
@@ -415,19 +416,7 @@ int main(int argc, char **argv)
     left = g[my_i][my_j-1];
     right = g[my_i][my_j+1];
 
-    if (my_rank == 0){
-        for(i = 0; i<py+2; i++){
-            for(j = 0; j<px+2; j++){
-            cout<<g[i][j]<<" ";
-        }
-            cout<<endl;
-        }
-
-        cout<<up<<endl;
-        cout<<down<<endl;
-        cout<<right<<endl;
-        cout<<left<<endl;
-    }
+  
     
 
     
@@ -448,17 +437,7 @@ int main(int argc, char **argv)
     R = alloc2D(m + 2, n + 2);
 
     initializeArrays(E, E_prev, R, m, n);
-    //cout<<"\nCheck5 \n"<<endl;
-
-    // for(i = 1; i<=m; i++){
-    //     for(j = 1; j<=n; j++){
-    //         E_prev[i][j] = i+j;
-    //     }
-    // }
-
-    
-    
-
+ 
     for (i = 1; i <= m_local; i++)
     {
         for (j = 0; j <= n_local; j++)
