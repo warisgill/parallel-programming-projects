@@ -149,7 +149,7 @@ int main (int argc, char** argv)
   const double a=0.1, b=0.1, kk=8.0, M1= 0.07, M2=0.3, epsilon=0.01, d=5e-5;
   
   double T=1000.0;
-  int m=20,n=20;
+  int m=400,n=400;
   int plot_freq = 0;
   int px = 1, py = 1;
   int no_comm = 0;
