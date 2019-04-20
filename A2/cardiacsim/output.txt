@@ -1,0 +1,105 @@
+
+
+Check 1 rank 3
+
+Check 2 rank 3
+1-1-12
+ geometry
+Check 3 rank 3
+
+Check 4 rank 3
+
+Check 6 rank 3
+ processed distributed correctlyGrid Size       : 400
+Duration of Sim : 1000
+Time step dt    : 0.0223951
+Process geometry: 2 x 2
+
+
+Check 1 rank 0
+
+Check 2 rank 0
+-121-1
+ geometry
+Check 3 rank 0
+
+Check 4 rank 0
+
+Check 6 rank 0
+
+Check 1 rank 1
+
+Check 2 rank 1
+-13-10
+ geometry
+Check 3 rank 1
+
+
+Check 1 rank 2
+
+Check 2 rank 2
+0-13-1
+ geometry
+Check 3 rank 2
+
+Check 4 rank 2
+
+Check 6 rank 2
+
+Check 7 rank 0
+
+Check 7 rank 2
+[mintlinux:05739] *** Process received signal ***
+[mintlinux:05741] *** Process received signal ***
+[mintlinux:05741] Signal: Segmentation fault (11)
+[mintlinux:05741] Signal code: Address not mapped (1)
+[mintlinux:05741] Failing at address: 0x68
+Check 4 rank 1
+
+Check 6 rank 1
+[mintlinux:05741] [ 0] [mintlinux:05739] Signal: Segmentation fault (11)
+[mintlinux:05739] Signal code: Address not mapped (1)
+[mintlinux:05739] Failing at address: 0x400000009a
+/lib/x86_64-linux-gnu/libc.so.6(+0x3ef20)[0x7fd13efc5f20]
+[mintlinux:05741] [ 1] /usr/lib/x86_64-linux-gnu/libmpi.so.20(ompi_request_default_wait+0x31)[0x7fd13fcfcbf1]
+[mintlinux:05741] [ 2] /usr/lib/x86_64-linux-gnu/libmpi.so.20(PMPI_Wait+0x61)[0x7fd13fd344f1]
+[mintlinux:05741] [ 3] ./d2_cardiacsim(+0xcd2f)[0x55e3d3a8ad2f]
+[mintlinux:05741] [ 4] /lib/x86_64-linux-gnu/libc.so.6[mintlinux:05739] [ 0] (/lib/x86_64-linux-gnu/libc.so.6(+0x3ef20)[0x7fe7c0052f20]
+[mintlinux:05739] [ 1] /usr/lib/x86_64-linux-gnu/libmpi.so.20(ompi_request_default_wait+0x31)[0x7fe7c0d89bf1
+Check 7 rank 1
+[mintlinux:05740] *** Process received signal ***
+[mintlinux:05740] Signal: Segmentation fault (11)
+[mintlinux:05740] Signal code: Address not mapped (1)
+[mintlinux:05740] Failing at address: 0x400000009a
+[mintlinux:05740] __libc_start_main+0xe7)[0x7fd13efa8b97]
+[mintlinux:05741] [ 5] ./d2_cardiacsim(+0xd6ea)[0x55e3d3a8b6ea]
+[mintlinux:05741] *** End of error message ***
+]
+[mintlinux:05739] [ 2] [ 0] /usr/lib/x86_64-linux-gnu/libmpi.so.20(PMPI_Wait+0x61)[0x7fe7c0dc14f1]
+[mintlinux:05739] [ 3] ./d2_cardiacsim(+0xcd55)[0x55664805fd55]
+[mintlinux:05739] [ 4] /lib/x86_64-linux-gnu/libc.so.6(+0x3ef20)/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xe7)[0x7fe7c0035b97]
+[mintlinux:05739] [0x7f2f87b02f20[ 5] ./d2_cardiacsim(+0xd6ea)[0x5566480606ea]
+]
+[mintlinux:05739] *** End of error message ***
+[mintlinux:05740] [ 1] /usr/lib/x86_64-linux-gnu/libmpi.so.20(ompi_request_default_wait+0x31)[0x7f2f88839bf1]
+[mintlinux:05740] [ 2] /usr/lib/x86_64-linux-gnu/libmpi.so.20(PMPI_Wait+0x61)[0x7f2f888714f1]
+[mintlinux:05740] [ 3] ./d2_cardiacsim(+0xcd55)[0x5567902ecd55]
+[mintlinux:05740] [ 4] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xe7)[0x7f2f87ae5b97]
+[mintlinux:05740] [ 5] ./d2_cardiacsim(+0xd6ea)[0x5567902ed6ea]
+[mintlinux:05740] *** End of error message ***
+
+Check 7 rank 3
+[mintlinux:05744] *** Process received signal ***
+[mintlinux:05744] Signal: Segmentation fault (11)
+[mintlinux:05744] Signal code: Address not mapped (1)
+[mintlinux:05744] Failing at address: 0x68
+[mintlinux:05744] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x3ef20)[0x7feaf70eef20]
+[mintlinux:05744] [ 1] /usr/lib/x86_64-linux-gnu/libmpi.so.20(ompi_request_default_wait+0x31)[0x7feaf7e25bf1]
+[mintlinux:05744] [ 2] /usr/lib/x86_64-linux-gnu/libmpi.so.20(PMPI_Wait+0x61)[0x7feaf7e5d4f1]
+[mintlinux:05744] [ 3] ./d2_cardiacsim(+0xcd2f)[0x5561751e8d2f]
+[mintlinux:05744] [ 4] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xe7)[0x7feaf70d1b97]
+[mintlinux:05744] [ 5] ./d2_cardiacsim(+0xd6ea)[0x5561751e96ea]
+[mintlinux:05744] *** End of error message ***
+--------------------------------------------------------------------------
+mpirun noticed that process rank 1 with PID 0 on node mintlinux exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------
