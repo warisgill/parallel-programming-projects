@@ -231,6 +231,7 @@ int main(int argc, char **argv)
   int px, py;
   int no_comm;
   int num_threads;
+  int parameters_to_broadcast[9];
   //printf("my rank: %d\n", my_rank);
   if (my_rank == 0)
   {
@@ -242,24 +243,33 @@ int main(int argc, char **argv)
     num_threads = 1;
     cmdLine(argc, argv, T, n, px, py, plot_freq, no_comm, num_threads);
     m = n;
-    // Allocate contiguous memory for solution arrays
-    // The computational box is defined on [1:m+1,1:n+1]
-    // We pad the arrays in order to facilitate differencing on the
-    // boundaries of the computation box
-    //E = alloc2D(m, n);
-    
+    no_of_vertical_strips = 2;
+    no_of_horizontal_strips = 1;
+
+    parameters_to_broadcast[0] = m;
+    parameters_to_broadcast[1] = n;
+    parameters_to_broadcast[2] = plot_freq;
+    parameters_to_broadcast[3] = px;
+    parameters_to_broadcast[4] = py;
+    parameters_to_broadcast[5] = no_comm;
+    parameters_to_broadcast[6] = num_threads;
+    parameters_to_broadcast[7] = no_of_horizontal_strips;
+    parameters_to_broadcast[8] = no_of_vertical_strips;
   }
   MPI_Bcast(&T, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&plot_freq, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&px, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&py, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&no_comm, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&num_threads, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&parameters_to_broadcast, 9, MPI_INT, 0, MPI_COMM_WORLD);
+  
+  m = parameters_to_broadcast[0];
+  n = parameters_to_broadcast[1];
+  plot_freq = parameters_to_broadcast[2];
+  px = parameters_to_broadcast[3];
+  py = parameters_to_broadcast[4];
+  no_comm = parameters_to_broadcast[5];
+  num_threads = parameters_to_broadcast[6];
+  no_of_horizontal_strips = parameters_to_broadcast[7];
+  no_of_vertical_strips = parameters_to_broadcast[8];
+
   E_prev = alloc2D(m, n);
-  no_of_vertical_strips = 2;
-  no_of_horizontal_strips = 2;
 
   my_chunk_width = n / no_of_vertical_strips;
   my_chunk_height = m / no_of_horizontal_strips;
@@ -390,6 +400,8 @@ for(int r = 0; r < my_chunk_height; r++)
     }
   }
   free(E_prev);
+
+  MPI_Finalize();
 
   return 0;
 }
