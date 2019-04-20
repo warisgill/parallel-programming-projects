@@ -4,11 +4,12 @@ include ./arch.gnu
 # DEBUG += -g
 
 
-app:		serial_cardiacsim d1_cardiacsim #d2_cardiacsim
+app:		serial_cardiacsim d1_cardiacsim d2_cardiacsim f_cardiacsim
 
 OBJECT0 = serial_cardiacsim.o splot.o cmdLine.o
 OBJECT1 = d1_cardiacsim.o splot.o cmdLine.o
-# OBJECT2 = d2_cardiacsim.o splot.o cmdLine.o
+OBJECT2 = d2_cardiacsim.o splot.o cmdLine.o
+OBJECT3 = f_cardiacsim.o splot.o cmdLine.o
 
 serial_cardiacsim:	        $(OBJECT0) 
 		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT0)  $(LDLIBS)
@@ -16,12 +17,15 @@ serial_cardiacsim:	        $(OBJECT0)
 d1_cardiacsim:	        $(OBJECT1) 
 		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT1)  $(LDLIBS)
 
-# d2_cardiacsim:	        $(OBJECT2) 
-# 		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT2)  $(LDLIBS)
+d2_cardiacsim:	        $(OBJECT2) 
+		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT2)  $(LDLIBS)
+
+f_cardiacsim:	        $(OBJECT3) 
+		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT3)  $(LDLIBS)
 
 
 clean:	
-	$(RM) *.o d1_cardiacsim serial_cardiacsim *~;
+	$(RM) *.o d1_cardiacsim d1_cardiacsim serial_cardiacsim f_cardiacsim*~;
 	$(RM) core;
 
 

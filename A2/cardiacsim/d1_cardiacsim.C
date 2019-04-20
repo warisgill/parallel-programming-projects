@@ -263,6 +263,11 @@ int main(int argc, char **argv)
             R_local[i][j] = R[(my_rank * m_local) + i][j];
         }
     }
+    
+    free(E);
+    free(E_prev);
+    free(R);
+    
 
     double dx = 1.0 / n;
 
@@ -352,9 +357,7 @@ int main(int argc, char **argv)
     free(E_prev_local);
     free(R_local);
 
-    free(E);
-    free(E_prev);
-    free(R);
+    
     MPI_Finalize();
     return 0;
 }
