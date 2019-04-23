@@ -93,16 +93,9 @@ void simulate(double **E, double **E_prev, double **R,
      * Using mirror boundaries
      */
 
-    /*
-        Handle Updown Communication
-    */
-    // cout<<"\nCheck 1 rank "<<my_rank<<endl;
-
-    // double** buffer = alloc2D(4,m);
-
     int tag1 = 0;
     int tag2 = 1;
-
+    int i = 0;
     MPI_Status stat;
 
     MPI_Request req1;
@@ -117,24 +110,17 @@ void simulate(double **E, double **E_prev, double **R,
 
     if (up > -1)
     {
-        // send only to up
         MPI_Isend(&E_prev[1][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &req1);
-        //MPI_Wait(&req1, &stat);
-        //cout<<"My Rank :" << my_rank<<"Sent to "<< up<<endl;
     }
-
+    
     if (down > -1)
     {
-        // send only to up
-        // cout<<"Num Elements"<<n;
         MPI_Isend(&E_prev[m][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD, &req2);
-        //MPI_Wait(&req2, &stat);
-        //cout<<"My Rank :" << my_rank<< "Sent to "<< down<<endl;
-    }
 
+    }
+    
     if (left > -1)
     {
-        int i = 0;
 
         for (i = 1; i <= m; i++)
         {
@@ -142,19 +128,16 @@ void simulate(double **E, double **E_prev, double **R,
         }
 
         MPI_Isend(&buffer[0][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD, &req5);
-        //MPI_Wait(&req5, &stat);
     }
 
     if (right > -1)
     {
-        int i = 0;
         for (i = 1; i <= m; i++)
         {
             buffer[1][i - 1] = E_prev[i][n];
         }
 
         MPI_Isend(&buffer[1][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD, &req6);
-        //MPI_Wait(&req6, &stat);
     }
 
     for (row = 1; row <= m; row++)
@@ -170,62 +153,40 @@ void simulate(double **E, double **E_prev, double **R,
     if (down > -1)
     {
         MPI_Irecv(&E_prev[m + 1][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD, &req3);
-        // MPI_Wait(&req3, &stat);
-        // cout<<"My Rank :" << my_rank<< "Recvied from "<< down<<endl;
     }
 
     if (up > -1)
     {
         MPI_Irecv(&E_prev[0][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &req4);
-        // MPI_Wait(&req4, &stat);
-        //cout<<"My Rank :" << my_rank<<"Recvied from "<< up<<endl;
     }
 
     if (left > -1)
     {
-
         MPI_Irecv(&buffer[2][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD, &req7);
-        // MPI_Wait(&req7, &stat);
-        // int i =0;
-        // for(i =1; i<=m;i++){
-        //     E_prev[i][0] = buffer[2][i-1];
-        // }
     }
 
     if (right > -1)
     {
-
         MPI_Irecv(&buffer[3][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD, &req8);
-        // MPI_Wait(&req8, &stat);
-
-        // int i = 0;
-        // for(i =1; i<=m;i++){
-        //    E_prev[i][n+1] = buffer[3][i-1];
-        // }
     }
 
-    // ============================================================================== test ==================================
+    // ====Wait on Recv Data ===
 
     if (down > -1)
     {
-        // MPI_Irecv(&E_prev[m + 1][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD, &req3);
         MPI_Wait(&req3, &stat);
-        // cout<<"My Rank :" << my_rank<< "Recvied from "<< down<<endl;
     }
 
     if (up > -1)
     {
-        // MPI_Irecv(&E_prev[0][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &req4);
         MPI_Wait(&req4, &stat);
-        //cout<<"My Rank :" << my_rank<<"Recvied from "<< up<<endl;
     }
 
     if (left > -1)
     {
 
-        // MPI_Irecv(&buffer[2][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD,&req7);
         MPI_Wait(&req7, &stat);
-        int i = 0;
+        
         for (i = 1; i <= m; i++)
         {
             E_prev[i][0] = buffer[2][i - 1];
@@ -234,19 +195,16 @@ void simulate(double **E, double **E_prev, double **R,
 
     if (right > -1)
     {
-
-        // MPI_Irecv(&buffer[3][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD,&req8);
         MPI_Wait(&req8, &stat);
-
-        int i = 0;
+        
         for (i = 1; i <= m; i++)
         {
             E_prev[i][n + 1] = buffer[3][i - 1];
         }
     }
-    // ======================================================================================================================
 
-    // Solve for the excitation, the PDE
+
+    //===== Solve for the excitation, the PDE ====
     for (row = 1; row <= m; row++)
     {
         for (col = 1; col <= n; col++)
@@ -271,61 +229,36 @@ void simulate(double **E, double **E_prev, double **R,
             R[row][col] = R[row][col] + dt * (epsilon + M1 * R[row][col] / (E[row][col] + M2)) * (-R[row][col] - kk * E[row][col] * (E[row][col] - b - 1));
     }
 
-    // ===================================================================================================
+    // Wait on sent data
 
     if (up > -1)
-    {
-        // send only to up
-        // MPI_Isend(&E_prev[1][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD,&req1);
+    {     
         MPI_Wait(&req1, &stat);
-        //cout<<"My Rank :" << my_rank<<"Sent to "<< up<<endl;
     }
 
     if (down > -1)
     {
-        // send only to up
-        // cout<<"Num Elements"<<n;
-        // MPI_Isend(&E_prev[m][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD,&req2);
         MPI_Wait(&req2, &stat);
-        //cout<<"My Rank :" << my_rank<< "Sent to "<< down<<endl;
     }
 
     if (left > -1)
     {
-        // int i = 0;
-
-        // for(i =1; i<=m;i++){
-        //     buffer[0][i-1] = E_prev[i][1];
-        // }
-
-        // MPI_Isend(&buffer[0][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD,&req5);
         MPI_Wait(&req5, &stat);
     }
 
     if (right > -1)
     {
-        // int i = 0;
-        // for(i =1; i<=m;i++){
-        //     buffer[1][i-1] = E_prev[i][n];
-        // }
-
-        // MPI_Isend(&buffer[1][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD,&req6);
         MPI_Wait(&req6, &stat);
     }
 
-    // ============================================================================
-
-    //free(buffer);
 }
 
-void initializeArrays(double **E_local, double **E_prev_local, double **R_local, double **buffer, int m, int n, int px, int py, int my_i, int my_j, int *m_l, int *n_l);
 void initializeArrays(double **E, double **E_prev, double **R, int m, int n);
-void print2DArray(double **arr, int m, int n);
 void setNeighbours(int my_rank, int *up, int *down, int *left, int *right, int *my_i, int *my_j, int px, int py);
+void print2DArray(double **arr, int m, int n);
 
-// ==========================================================================================================================
-
-// Main program
+// ================================================== Main program ========================================================================
+ 
 int main(int argc, char **argv)
 {
     double **E, **R, **E_prev;
@@ -576,79 +509,6 @@ void setNeighbours(int my_rank, int *up, int *down, int *left, int *right, int *
     *down = g[*my_i + 1][*my_j];
     *left = g[*my_i][*my_j - 1];
     *right = g[*my_i][*my_j + 1];
-}
-
-void initializeArrays(double **E_local, double **E_prev_local, double **R_local, double **buffer, int m, int n, int px, int py, int my_i, int my_j, int *m_l, int *n_l)
-{
-    int col, row;
-    int m_local = m / py; // rows
-    int n_local = n / px; //columns
-
-    double **E = alloc2D(m + 2, n + 2);
-    double **E_prev = alloc2D(m + 2, n + 2);
-    double **R = alloc2D(m + 2, n + 2);
-
-    E_local = alloc2D(m_local + 2, n_local + 2);
-    E_prev_local = alloc2D(m_local + 2, n_local + 2);
-    R_local = alloc2D(m_local + 2, n_local + 2);
-
-    buffer = alloc2D(4, m_local); // to recv and send data from left right
-
-    // Initialization
-    for (row = 1; row <= m; row++)
-    {
-        for (col = 1; col <= n; col++)
-        {
-            E_prev[row][col] = R[row][col] = 0;
-        }
-    }
-
-    for (row = 1; row <= m; row++)
-    {
-        for (col = n / 2 + 1; col <= n; col++)
-        {
-            E_prev[row][col] = 1.0;
-        }
-    }
-
-    for (row = m / 2 + 1; row <= m; row++)
-    {
-        for (col = 1; col <= n; col++)
-        {
-            R[row][col] = 1.0;
-        }
-    }
-
-    // assigning values to local arrays
-    int i, j;
-    for (i = 1; i <= m_local; i++)
-    {
-        for (j = 0; j <= n_local; j++)
-        {
-            E_prev_local[i][j] = E_prev[(my_i - 1) * m_local + i][(my_j - 1) * n_local + j];
-            R_local[i][j] = R[(my_i - 1) * m_local + i][(my_j - 1) * n_local + j];
-        }
-    }
-
-    for (i = 0; i < m_local + 2; i++)
-    {
-        E_prev_local[i][0] = 0;
-        E_prev_local[i][n_local + 1] = 0;
-    }
-
-    for (j = 0; j < n_local + 2; j++)
-    {
-        E_prev_local[0][j] = 0;
-        E_prev_local[m_local + 1][j] = 0;
-    }
-
-    free(E);
-    free(E_prev);
-    free(R);
-
-    *m_l = m_local;
-    *n_l = n_local;
-    cout << "You are good here" << endl;
 }
 
 void print2DArray(double **arr, int m, int n)
