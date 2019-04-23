@@ -83,7 +83,7 @@ void cmdLine(int argc, char *argv[], double &T, int &n, int &px, int &py, int &p
 void simulate(double **E, double **E_prev, double **R,
               const double alpha, const int n, const int m, const double kk,
               const double dt, const double a, const double epsilon,
-              const double M1, const double M2, const double b, int my_rank, int comm_sz, int up, int down, int right, int left, double **buffer)
+              const double M1, const double M2, const double b, int my_rank, int comm_sz, int up, int down, int right, int left, double **buffer, int no_comm)
 {
     int col, row;
     /* 
@@ -108,36 +108,39 @@ void simulate(double **E, double **E_prev, double **R,
     MPI_Request req7;
     MPI_Request req8;
 
-    if (up > -1)
+    // === Sending Data ===
+    if (no_comm == 0)
     {
-        MPI_Isend(&E_prev[1][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &req1);
-    }
-    
-    if (down > -1)
-    {
-        MPI_Isend(&E_prev[m][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD, &req2);
-
-    }
-    
-    if (left > -1)
-    {
-
-        for (i = 1; i <= m; i++)
+        if (up > -1)
         {
-            buffer[0][i - 1] = E_prev[i][1];
+            MPI_Isend(&E_prev[1][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &req1);
         }
 
-        MPI_Isend(&buffer[0][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD, &req5);
-    }
-
-    if (right > -1)
-    {
-        for (i = 1; i <= m; i++)
+        if (down > -1)
         {
-            buffer[1][i - 1] = E_prev[i][n];
+            MPI_Isend(&E_prev[m][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD, &req2);
         }
 
-        MPI_Isend(&buffer[1][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD, &req6);
+        if (left > -1)
+        {
+
+            for (i = 1; i <= m; i++)
+            {
+                buffer[0][i - 1] = E_prev[i][1];
+            }
+
+            MPI_Isend(&buffer[0][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD, &req5);
+        }
+
+        if (right > -1)
+        {
+            for (i = 1; i <= m; i++)
+            {
+                buffer[1][i - 1] = E_prev[i][n];
+            }
+
+            MPI_Isend(&buffer[1][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD, &req6);
+        }
     }
 
     for (row = 1; row <= m; row++)
@@ -150,59 +153,62 @@ void simulate(double **E, double **E_prev, double **R,
     for (col = 1; col <= n; col++)
         E_prev[m + 1][col] = E_prev[m - 1][col];
 
-    if (down > -1)
+    // ===== Recving Data ====
+    if (no_comm == 0)
     {
-        MPI_Irecv(&E_prev[m + 1][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD, &req3);
-    }
-
-    if (up > -1)
-    {
-        MPI_Irecv(&E_prev[0][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &req4);
-    }
-
-    if (left > -1)
-    {
-        MPI_Irecv(&buffer[2][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD, &req7);
-    }
-
-    if (right > -1)
-    {
-        MPI_Irecv(&buffer[3][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD, &req8);
-    }
-
-    // ====Wait on Recv Data ===
-
-    if (down > -1)
-    {
-        MPI_Wait(&req3, &stat);
-    }
-
-    if (up > -1)
-    {
-        MPI_Wait(&req4, &stat);
-    }
-
-    if (left > -1)
-    {
-
-        MPI_Wait(&req7, &stat);
-        
-        for (i = 1; i <= m; i++)
+        if (down > -1)
         {
-            E_prev[i][0] = buffer[2][i - 1];
+            MPI_Irecv(&E_prev[m + 1][1], n, MPI_DOUBLE, down, 0, MPI_COMM_WORLD, &req3);
+        }
+
+        if (up > -1)
+        {
+            MPI_Irecv(&E_prev[0][1], n, MPI_DOUBLE, up, 0, MPI_COMM_WORLD, &req4);
+        }
+
+        if (left > -1)
+        {
+            MPI_Irecv(&buffer[2][0], m, MPI_DOUBLE, left, 0, MPI_COMM_WORLD, &req7);
+        }
+
+        if (right > -1)
+        {
+            MPI_Irecv(&buffer[3][0], m, MPI_DOUBLE, right, 0, MPI_COMM_WORLD, &req8);
+        }
+
+        // ====Wait on Recv Data ===
+
+        if (down > -1)
+        {
+            MPI_Wait(&req3, &stat);
+        }
+
+        if (up > -1)
+        {
+            MPI_Wait(&req4, &stat);
+        }
+
+        if (left > -1)
+        {
+
+            MPI_Wait(&req7, &stat);
+
+            for (i = 1; i <= m; i++)
+            {
+                E_prev[i][0] = buffer[2][i - 1];
+            }
+        }
+
+        if (right > -1)
+        {
+            MPI_Wait(&req8, &stat);
+
+            for (i = 1; i <= m; i++)
+            {
+                E_prev[i][n + 1] = buffer[3][i - 1];
+            }
         }
     }
-
-    if (right > -1)
-    {
-        MPI_Wait(&req8, &stat);
-        
-        for (i = 1; i <= m; i++)
-        {
-            E_prev[i][n + 1] = buffer[3][i - 1];
-        }
-    }
-
 
     //===== Solve for the excitation, the PDE ====
     for (row = 1; row <= m; row++)
@@ -216,7 +222,7 @@ void simulate(double **E, double **E_prev, double **R,
     /* 
      * Solve the ODE, advancing excitation and recovery to the
      *     next timtestep
-     */
+    */
     for (row = 1; row <= m; row++)
     {
         for (col = 1; col <= n; col++)
@@ -230,27 +236,28 @@ void simulate(double **E, double **E_prev, double **R,
     }
 
     // Wait on sent data
-
-    if (up > -1)
-    {     
-        MPI_Wait(&req1, &stat);
-    }
-
-    if (down > -1)
+    if (no_comm == 0)
     {
-        MPI_Wait(&req2, &stat);
-    }
+        if (up > -1)
+        {
+            MPI_Wait(&req1, &stat);
+        }
 
-    if (left > -1)
-    {
-        MPI_Wait(&req5, &stat);
-    }
+        if (down > -1)
+        {
+            MPI_Wait(&req2, &stat);
+        }
 
-    if (right > -1)
-    {
-        MPI_Wait(&req6, &stat);
-    }
+        if (left > -1)
+        {
+            MPI_Wait(&req5, &stat);
+        }
 
+        if (right > -1)
+        {
+            MPI_Wait(&req6, &stat);
+        }
+    }
 }
 
 void initializeArrays(double **E, double **E_prev, double **R, int m, int n);
@@ -258,7 +265,7 @@ void setNeighbours(int my_rank, int *up, int *down, int *left, int *right, int *
 void print2DArray(double **arr, int m, int n);
 
 // ================================================== Main program ========================================================================
- 
+
 int main(int argc, char **argv)
 {
     double **E, **R, **E_prev;
@@ -300,12 +307,11 @@ int main(int argc, char **argv)
     int my_i = -1;
     int my_j = -1;
     setNeighbours(my_rank, &up, &down, &left, &right, &my_i, &my_j, px, py);
-    // =================================
 
     m_local = m / py; // rows
     n_local = n / px; //columns
 
-    // =======================================  Handling Corner Cases ============================================
+    // =======================  Handling Corner Cases ==============
     int x_axis_array[px];
     int y_axis_array[py];
 
@@ -418,7 +424,7 @@ int main(int argc, char **argv)
         t += dt;
         niter++;
 
-        simulate(E_local, E_prev_local, R_local, alpha, n_local, m_local, kk, dt, a, epsilon, M1, M2, b, my_rank, comm_sz, up, down, right, left, right_left_send_recv_buffer);
+        simulate(E_local, E_prev_local, R_local, alpha, n_local, m_local, kk, dt, a, epsilon, M1, M2, b, my_rank, comm_sz, up, down, right, left, right_left_send_recv_buffer, no_comm);
 
         //swap current E with previous E
         double **tmp = E_local;
@@ -434,16 +440,19 @@ int main(int argc, char **argv)
             }
         }
     } //end of while loop
-    
 
     double mx_local;
     double l2norm_local = stats(E_prev_local, m_local, n_local, &mx_local);
 
-    MPI_Ireduce(&mx_local, &mx, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD, &req1);
-    MPI_Ireduce(&l2norm_local, &l2norm, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD, &req2);
-
-    MPI_Wait(&req1, &stat);
-    MPI_Wait(&req2, &stat);
+    // MPI_Reduce(&mx_local, &mx, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+    // MPI_Reduce(&l2norm_local, &l2norm, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (no_comm == 0)
+    {
+        MPI_Ireduce(&mx_local, &mx, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD, &req1);
+        MPI_Ireduce(&l2norm_local, &l2norm, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD, &req2);
+        MPI_Wait(&req1, &stat);
+        MPI_Wait(&req2, &stat);
+    }
 
     double time_elapsed = getTime() - t0;
 
@@ -455,8 +464,9 @@ int main(int argc, char **argv)
         cout << "Number of Iterations        : " << niter << endl;
         cout << "Elapsed Time (sec)          : " << time_elapsed << endl;
         cout << "Sustained Gflops Rate       : " << Gflops << endl;
-        cout << "Sustained Bandwidth (GB/sec): " << BW << endl<< endl;
-        
+        cout << "Sustained Bandwidth (GB/sec): " << BW << endl
+             << endl;
+
         l2norm /= (double)((m) * (n));
         l2norm = sqrt(l2norm);
         cout << "Max: " << mx << " L2norm: " << l2norm << endl;
