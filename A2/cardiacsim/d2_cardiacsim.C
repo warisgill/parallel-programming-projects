@@ -414,6 +414,8 @@ int main(int argc, char **argv)
         cout << endl;
     }
 
+    MPI_Barrier(MPI_COMM_WORLD); // To Synchronize all the processes
+
     // Start the timer
     double t0 = getTime();
 
