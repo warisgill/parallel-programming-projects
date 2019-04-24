@@ -3,6 +3,7 @@ include ./arch.gnu
 # OPTIMIZATION = -O3
 # DEBUG += -g
 
+LDFLAGS = -fopenmp
 
 app:		serial_cardiacsim d1_cardiacsim d2_cardiacsim openmp_d2_cardiacsim 
 

@@ -1,0 +1,90 @@
+Loading openmpi module ...
+Loading GCC module ...
+PART D  with 2 nodes
+Setting stack size to unlimited...
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 191388
+max locked memory       (kbytes, -l) unlimited
+max memory size         (kbytes, -m) 20480000
+open files                      (-n) 1024
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) unlimited
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 4096
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited
+
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                20
+On-line CPU(s) list:   0-19
+Thread(s) per core:    1
+Core(s) per socket:    10
+Socket(s):             2
+NUMA node(s):          2
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 62
+Model name:            Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz
+Stepping:              4
+CPU MHz:               3100.015
+CPU max MHz:           3600.0000
+CPU min MHz:           1200.0000
+BogoMIPS:              5600.20
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              25600K
+NUMA node0 CPU(s):     0,2,4,6,8,10,12,14,16,18
+NUMA node1 CPU(s):     1,3,5,7,9,11,13,15,17,19
+Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt dtherm ida arat pln pts
+With OPENMP
+2 MPI and 16 Threads 2X1
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 2 x 1
+
+Number of Iterations        : 23173
+Elapsed Time (sec)          : 32.844
+Sustained Gflops Rate       : 20.715
+Sustained Bandwidth (GB/sec): 23.6743
+
+Max: 0.979365 L2norm: 0.498186
+2 MPI and 16 Threads 1X2
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 2
+
+Number of Iterations        : 23173
+Elapsed Time (sec)          : 32.2394
+Sustained Gflops Rate       : 21.1034
+Sustained Bandwidth (GB/sec): 24.1182
+
+Max: 0.979365 L2norm: 0.498186
+4 MPI  and 8 Threads 4X1
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 4 x 1
+
+Number of Iterations        : 23173
+Elapsed Time (sec)          : 929.493
+Sustained Gflops Rate       : 0.731971
+Sustained Bandwidth (GB/sec): 0.836538
+
+Max: 0.979365 L2norm: 0.498186
+4 MPI  and 8 Threads 1X4
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 4
+

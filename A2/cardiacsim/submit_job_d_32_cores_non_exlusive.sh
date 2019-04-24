@@ -2,12 +2,11 @@
 # -= Resources =-
 #
 #SBATCH --job-name=cardiac-sim
-#SBATCH --nodes=2
-#SBATCH --ntasks-per-node=16
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
 #SBATCH --partition=short
-#SBATCH --exclusive
 #SBATCH --time=30:00
-#SBATCH --output=cardiacsim-d-2-%j.out
+#SBATCH --output=cardiacsim-d-part2_1_nodes_32cores_non_exlusive-%j.out
 #SBATCH --mem-per-cpu=1000M
 
 ################################################################################
@@ -19,7 +18,7 @@ module load openmpi/3.0.0
 echo "Loading GCC module ..."
 module load gcc/7.3.0
 
-echo "PART D"
+echo "PART D  with 2 nodes"
 
 # Set stack size to unlimited
 echo "Setting stack size to unlimited..."

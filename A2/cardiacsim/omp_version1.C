@@ -94,22 +94,27 @@ void simulate(double **E, double **E_prev, double **R,
      * Using mirror boundaries
      */
 
-    int tag1 = 0;
-    int tag2 = 1;
-    int i = 0;
-    MPI_Status stat;
+    #pragma omp single 
+    {
+        int tag1 = 0;
+        int tag2 = 1;
+        int i = 0;
+        MPI_Status stat;
 
-    MPI_Request req1;
-    MPI_Request req2;
-    MPI_Request req3;
-    MPI_Request req4;
+        MPI_Request req1;
+        MPI_Request req2;
+        MPI_Request req3;
+        MPI_Request req4;
 
-    MPI_Request req5;
-    MPI_Request req6;
-    MPI_Request req7;
-    MPI_Request req8;
+        MPI_Request req5;
+        MPI_Request req6;
+        MPI_Request req7;
+        MPI_Request req8;
+    }
+    
 
     // === Sending Data ===
+    # pragma omp single
     if (no_comm == 0)
     {
         if (up > -1)
@@ -145,8 +150,8 @@ void simulate(double **E, double **E_prev, double **R,
         }
     }
 
-    #pragma omp parallel num_threads(thread_nums)
-    {
+    //#pragma omp parallel num_threads(thread_nums)
+    //{
         #pragma omp for schedule(static)
         for (row = 1; row <= m; row++){
             E_prev[row][0] = E_prev[row][2];
@@ -166,10 +171,11 @@ void simulate(double **E, double **E_prev, double **R,
         for (col = 1; col <= n; col++){
             E_prev[m + 1][col] = E_prev[m - 1][col];
         }
-    }
+    //}
     
 
     // ===== Recving Data ====
+    #pragma omp single
     if (no_comm == 0)
     {
         if (down > -1)
@@ -208,7 +214,7 @@ void simulate(double **E, double **E_prev, double **R,
         {
 
             MPI_Wait(&req7, &stat);
-            // #pragma omp parallel for num_threads(thread_nums)
+            //#pragma omp parallel for num_threads(thread_nums)
             for (i = 1; i <= m; i++)
             {
                 E_prev[i][0] = buffer[2][i - 1];
@@ -218,7 +224,7 @@ void simulate(double **E, double **E_prev, double **R,
         if (right > -1)
         {
             MPI_Wait(&req8, &stat);
-            // #pragma omp parallel for num_threads(thread_nums)
+            //#pragma omp parallel for num_threads(thread_nums)
             for (i = 1; i <= m; i++)
             {
                 E_prev[i][n + 1] = buffer[3][i - 1];
@@ -227,8 +233,8 @@ void simulate(double **E, double **E_prev, double **R,
     }
 
     //===== Solve for the excitation, the PDE ====
-    #pragma omp parallel num_threads(thread_nums)
-    {
+    // #pragma omp parallel num_threads(thread_nums)
+    // {
         #pragma omp for collapse(2) private(row,col) schedule(static)
         for (row = 1; row <= m; row++)
         {
@@ -255,10 +261,11 @@ void simulate(double **E, double **E_prev, double **R,
             for (col = 1; col <= n; col++)
                 R[row][col] = R[row][col] + dt * (epsilon + M1 * R[row][col] / (E[row][col] + M2)) * (-R[row][col] - kk * E[row][col] * (E[row][col] - b - 1));
         }
-    }
+    //}
         
 
     // Wait on sent data
+    #pragma omp single
     if (no_comm == 0)
     {
         if (up > -1)
@@ -443,28 +450,36 @@ int main(int argc, char **argv)
 
     double t = 0.0;
     int niter = 0;
-   // cout<<" dt "<<dt<<endl;
+    #pragma omp parallel
     while (t < T)
     {
-        t += dt;
-        niter++;
+        #pragma omp single
+        {
+            t += dt;
+            niter++;
+        }
+        
 
 
-            simulate(E_local, E_prev_local, R_local, alpha, n_local, m_local, kk, dt, a, epsilon, M1, M2, b, my_rank, comm_sz, up, down, right, left, right_left_send_recv_buffer, no_comm,num_threads);
+        simulate(E_local, E_prev_local, R_local, alpha, n_local, m_local, kk, dt, a, epsilon, M1, M2, b, my_rank, comm_sz, up, down, right, left, right_left_send_recv_buffer, no_comm,num_threads);
 
         //swap current E with previous E
-        double **tmp = E_local;
-        E_local = E_prev_local;
-        E_prev_local = tmp;
-
-        if (plot_freq)
+        #pragma omp single
         {
-            int k = (int)(t / plot_freq);
-            if ((t - k * plot_freq) < dt)
+            double **tmp = E_local;
+            E_local = E_prev_local;
+            E_prev_local = tmp;
+
+            if (plot_freq)
             {
-                splot(E_local, t, niter, m + 2, n + 2);
+                int k = (int)(t / plot_freq);
+                if ((t - k * plot_freq) < dt)
+                {
+                    splot(E_local, t, niter, m + 2, n + 2);
+                }
             }
         }
+        
     } //end of while loop
 
     double mx_local;

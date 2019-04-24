@@ -1,0 +1,618 @@
+Loading openmpi module ...
+Loading GCC module ...
+PART D
+Setting stack size to unlimited...
+core file size          (blocks, -c) 0
+data seg size           (kbytes, -d) unlimited
+scheduling priority             (-e) 0
+file size               (blocks, -f) unlimited
+pending signals                 (-i) 1030872
+max locked memory       (kbytes, -l) unlimited
+max memory size         (kbytes, -m) 20480000
+open files                      (-n) 1024
+pipe size            (512 bytes, -p) 8
+POSIX message queues     (bytes, -q) 819200
+real-time priority              (-r) 0
+stack size              (kbytes, -s) unlimited
+cpu time               (seconds, -t) unlimited
+max user processes              (-u) 4096
+virtual memory          (kbytes, -v) unlimited
+file locks                      (-x) unlimited
+
+Architecture:          x86_64
+CPU op-mode(s):        32-bit, 64-bit
+Byte Order:            Little Endian
+CPU(s):                20
+On-line CPU(s) list:   0-19
+Thread(s) per core:    1
+Core(s) per socket:    10
+Socket(s):             2
+NUMA node(s):          2
+Vendor ID:             GenuineIntel
+CPU family:            6
+Model:                 62
+Model name:            Intel(R) Xeon(R) CPU E5-2670 v2 @ 2.50GHz
+Stepping:              4
+CPU MHz:               1200.000
+CPU max MHz:           2500.0000
+CPU min MHz:           1200.0000
+BogoMIPS:              4987.61
+Virtualization:        VT-x
+L1d cache:             32K
+L1i cache:             32K
+L2 cache:              256K
+L3 cache:              25600K
+NUMA node0 CPU(s):     0-9
+NUMA node1 CPU(s):     10-19
+Flags:                 fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm epb tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt dtherm ida arat pln pts
+With OPENMP
+2 MPI and 16 Threads 2X1
+Grid Size       : 1024
+Duration of Sim : Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 100
+Time step dt    : 0.00431553
+Process geometry: 2 x 1
+
+0.00431553
+Process geometry: 2 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x1cb5070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fffd201e6e4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=537510150
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xc12070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffd74eb4944) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=873054470
+:
+system msg for write_line failure : Bad file descriptor
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19139,1],1]
+  Exit code:    6
+--------------------------------------------------------------------------
+2 MPI and 16 Threads 1X2
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 2
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 2
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2ba5d81e2028, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe2833a314) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=738836742
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b3f7c1fd028, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff5e8ef324) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=873054470
+:
+system msg for write_line failure : Bad file descriptor
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19114,1],0]
+  Exit code:    6
+--------------------------------------------------------------------------
+4 MPI  and 8 Threads 4X1
+Grid Size       : 1024
+Duration of Sim : Grid Size       : 1024
+Duration of Sim : 100Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 4 x 1
+
+100
+Time step dt    : 0.00431553
+Process geometry: 4 x 1
+
+
+Time step dt    : 0.00431553
+Process geometry: 4 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x1c8d070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffc013d83a4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=470401286
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x890070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffc7c86af34) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=403292422
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x24f4070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff01539584) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=336183558
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 4 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xb48070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe227c5b84) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=639238
+:
+system msg for write_line failure : Bad file descriptor
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19099,1],0]
+  Exit code:    6
+--------------------------------------------------------------------------
+4 MPI  and 8 Threads 1X4
+Grid Size       : 1024
+Duration of Sim : Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b6970e5a828, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffc0abc7c64) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=604619014
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 4
+
+100
+Time step dt    : 0.00431553
+Process geometry: 1 x 4
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b1e0c1a6828, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffefc8c28e4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=537510150
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b470ed81828, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff4facc824) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=873054470
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b2bfb18b828, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff84f1bc94) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=873054470
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 4
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 4
+
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19079,1],0]
+  Exit code:    6
+--------------------------------------------------------------------------
+8 MPI and 4 Threads 8X1
+Grid Size       : 1024
+Duration of Sim : Grid Size       : 1024
+Duration of Sim : Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xc30070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffc1933bdc4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=134856966
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xeaa070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffcd0a92094) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=201965830
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x1f19070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffd84706c34) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=269074694
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xa99070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe64376004) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=134856966
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x207d070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff1d584994) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=738836742
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x88d070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fffc4149d54) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=537510150
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 8 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x16d1070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe262b1a44) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=201965830
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x15d8070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff0a1b28f4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=805945606
+:
+system msg for write_line failure : Bad file descriptor
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19305,1],0]
+  Exit code:    6
+--------------------------------------------------------------------------
+8 MPI and 4 Threads 1X8
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b6018533c28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffc4a40ad04) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=336183558
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b1135d26c28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffdfeb1ef44) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=67748102
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b7c37935c28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffd251c9714) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=1007272198
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b7937ab0c28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffd10cfea04) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=738836742
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2ba1366d7c28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffefb51a084) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=134856966
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2acf5dd9cc28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffc28138e54) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=940163334
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2ae7032a3c28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffd6486a234) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=639238
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2ae5eee02c28, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffcdec9dc04) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=201965830
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 8
+
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19295,1],0]
+  Exit code:    6
+--------------------------------------------------------------------------
+16 MPI and 2 Threads 16X1
+Grid Size       : 1024
+Grid Size       : 1024
+Grid Size       : 1024
+Duration of Sim : Duration of Sim : Duration of Sim : Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x25df070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffcd79308b4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=336183558
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xfb6070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff9f29ebd4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=604619014
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x9cb070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe7caae0b4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=403292422
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x1ff5070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffd083fbcb4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=940163334
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x1edd070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fff8a1493e4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=201965830
+:
+system msg for write_line failure : Bad file descriptor
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 16 x 1
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xda7070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe522c5ab4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=336183558
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x115e070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fffaeb87014) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=671727878
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0xa78070, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7fffc25213c4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=604619014
+:
+system msg for write_line failure : Bad file descriptor
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19268,1],0]
+  Exit code:    6
+--------------------------------------------------------------------------
+16 MPI and 2 Threads 1X16
+Grid Size       : 1024
+Duration of Sim : Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 16
+
+100
+Time step dt    : 0.00431553
+Process geometry: 1 x 16
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b61ee9b4628, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe2be0d034) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=134856966
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b7fdf134628, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffc05029194) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=604619014
+:
+system msg for write_line failure : Bad file descriptor
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 16
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 16
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2ad30b7d9628, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffdc65175e4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=873054470
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b621ef11628, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffdd1042af4) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=604619014
+:
+system msg for write_line failure : Bad file descriptor
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 16
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 16
+
+Grid Size       : 1024
+Duration of Sim : 100
+Time step dt    : 0.00431553
+Process geometry: 1 x 16
+
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2aae715b0628, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffcb6210f14) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=403292422
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2b0716834628, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffe8a205244) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=336183558
+:
+system msg for write_line failure : Bad file descriptor
+Fatal error in PMPI_Isend: Invalid rank, error stack:
+PMPI_Isend(149): MPI_Isend(buf=0x2af409f1a628, count=1024, MPI_DOUBLE, dest=1, tag=0, MPI_COMM_WORLD, request=0x7ffde32fff94) failed
+PMPI_Isend(97).: Invalid rank has value 1 but must be nonnegative and less than 1
+[unset]: write_line error; fd=-1 buf=:cmd=abort exitcode=639238
+:
+system msg for write_line failure : Bad file descriptor
+--------------------------------------------------------------------------
+mpirun detected that one or more processes exited with non-zero status, thus causing
+the job to be terminated. The first process to do so was:
+
+  Process name: [[19232,1],0]
+  Exit code:    6
+--------------------------------------------------------------------------
+Finished with execution!
