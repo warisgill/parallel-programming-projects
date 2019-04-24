@@ -443,7 +443,7 @@ int main(int argc, char **argv)
 
     double t = 0.0;
     int niter = 0;
-   // cout<<" dt "<<dt<<endl;
+   //cout<<" dt "<<dt<<endl;
     while (t < T)
     {
         t += dt;
@@ -466,6 +466,8 @@ int main(int argc, char **argv)
             }
         }
     } //end of while loop
+
+    //cout<<" Number of Iterations "<<
 
     double mx_local;
     double l2norm_local = stats(E_prev_local, m_local, n_local, &mx_local);

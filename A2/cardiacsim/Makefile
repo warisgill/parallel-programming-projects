@@ -5,13 +5,13 @@ include ./arch.gnu
 
 LDFLAGS = -fopenmp
 
-app:		serial_cardiacsim d1_cardiacsim d2_cardiacsim openmp_d2_cardiacsim 
+app:		serial_cardiacsim d1_cardiacsim d2_cardiacsim openmp_d2_cardiacsim part_e_d2_cardiacsim
 
 OBJECT0 = serial_cardiacsim.o splot.o cmdLine.o
 OBJECT1 = d1_cardiacsim.o splot.o cmdLine.o
 OBJECT2 = d2_cardiacsim.o splot.o cmdLine.o
 OBJECT3 = openmp_d2_cardiacsim.o splot.o cmdLine.o
-
+OBJECT4 = part_e_d2_cardiacsim.o splot.o cmdLine.o
 
 serial_cardiacsim:	        $(OBJECT0) 
 		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT0)  $(LDLIBS)
@@ -25,9 +25,12 @@ d2_cardiacsim:	        $(OBJECT2)
 openmp_d2_cardiacsim:	        $(OBJECT3) 
 		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT3)  $(LDLIBS)
 
+part_e_d2_cardiacsim:	        $(OBJECT4) 
+		$(C++LINK) $(LDFLAGS) -o $@ $(OBJECT4)  $(LDLIBS)
+
 
 clean:	
-	$(RM) *.o a.out openmp_d2_cardiacsim d2_cardiacsim d1_cardiacsim serial_cardiacsim *~;
+	$(RM) *.o a.out openmp_d2_cardiacsim d2_cardiacsim d1_cardiacsim serial_cardiacsim part_e_d2_cardiacsim *~;
 	$(RM) core;
 
 
