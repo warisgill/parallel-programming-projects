@@ -61,3 +61,11 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# cuda gitignore
+*.i
+*.ii
+*.gpu
+*.ptx
+*.cubin
+*.fatbin
