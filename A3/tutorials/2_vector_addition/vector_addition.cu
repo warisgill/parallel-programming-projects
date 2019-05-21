@@ -25,6 +25,7 @@
     1. blockDim.x  is the number of threads per block 
     2. Passing n so that index does not exceeds the array size
 */
+
 __global__ void add(int *a, int *b, int * c, int n){
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     if (i < n) {
