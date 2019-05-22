@@ -127,44 +127,30 @@ void simulate(double **E, double **E_prev, double **R, const double alpha, const
 		E_prev[row][0] = E_prev[row][2];
 		E_prev_1D[row* WIDTH + 0] = E_prev_1D[row*WIDTH + 2];
 	}
-
-    //cout<< "check 2"<<endl;
 	
 	for (row = 1; row <= m; row++) {
 		E_prev[row][n + 1] = E_prev[row][n - 1];
 		E_prev_1D[row*WIDTH+ (n+1)] = E_prev_1D[row*WIDTH + (n-1)];
 	}
 
-    //cout<< "check 3"<<endl;
-
 	for (col = 1; col <= n; col++) {
 		E_prev[0][col] = E_prev[2][col];
 		E_prev_1D[0*WIDTH+col] = E_prev_1D[2*WIDTH+ col];
 	}
-
-    //cout<< "check 4"<<endl;
 
 	for (col = 1; col <= n; col++) {
 		E_prev[m + 1][col] = E_prev[m - 1][col];
 		E_prev_1D[(m+1)*WIDTH+ col] = E_prev_1D[(m-1)*WIDTH+ col];
 	}
 
-    //cout<< "check 5"<<endl;
-
 	// Solve for the excitation, the PDE
 	for (row = 1; row <= m; row++){
 		for (col = 1; col <= n; col++){
-			//cout<< "Check 5.1"<<endl;
             E[row][col] = E_prev[row][col] + alpha * (E_prev[row][col + 1] + E_prev[row][col - 1] - 4 * E_prev[row][col] + E_prev[row + 1][col] + E_prev[row - 1][col]);
             
-            //cout<< "Check 5.1"<<endl;
-
-
 			E_1D[row*WIDTH+col] = E_prev_1D[row*WIDTH+col] + alpha * (E_prev_1D[row*WIDTH+(col+1)] + E_prev_1D[row*WIDTH + (col-1)] - 4 * E_prev_1D[row*WIDTH+ col] + E_prev_1D[(row + 1)*WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
 		}
 	}
-
-    //cout<< "check 6"<<endl;
 
 	/* 
 	* Solve the ODE, advancing excitation and recovery to the
@@ -179,8 +165,6 @@ void simulate(double **E, double **E_prev, double **R, const double alpha, const
 
 		}
 	}
-
-    //cout<< "check 7"<<endl;
 
 	for (row = 1; row <= m; row++){
 		for (col = 1; col <= n; col++) {

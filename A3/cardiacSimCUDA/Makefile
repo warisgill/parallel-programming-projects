@@ -228,7 +228,7 @@ ALL_LDFLAGS += $(addprefix -Xlinker ,$(LDFLAGS))
 ALL_LDFLAGS += $(addprefix -Xlinker ,$(EXTRA_LDFLAGS))
 
 # Common includes and paths for CUDA
-INCLUDES  := -I../../common/inc -I./
+INCLUDES  := -I../../common/inc
 LIBRARIES :=
 
 ################################################################################
@@ -261,7 +261,7 @@ endif
 # Target rules
 all: build
 
-build: cardiacsim
+build: cardiacsim_kernels
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -270,21 +270,22 @@ else
 	@echo "Sample is ready - all dependencies have been met"
 endif
 
-cardiacsim.o:cardiacsim.cpp
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
-
 cardiacsim_kernels.o:cardiacsim_kernels.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-cardiacsim: cardiacsim.o cardiacsim_kernels.o
+cardiacsim_kernels: cardiacsim_kernels.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 	$(EXEC) cp $@ ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)
 
 run: build
-	$(EXEC) ./cardiacsim
+	$(EXEC) ./cardiacsim_kernels
 
 clean:
-	rm -f cardiacsim cardiacsim.o cardiacsim_kernels.o
-	rm -rf ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/cardiacsim
+	rm -f cardiacsim_kernels cardiacsim_kernels.o
+	rm -rf ../../bin/$(TARGET_ARCH)/$(TARGET_OS)/$(BUILD_TYPE)/cardiacsim_kernels
+
+clobber: clean
+
+
 

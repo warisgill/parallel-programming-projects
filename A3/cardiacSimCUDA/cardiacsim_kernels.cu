@@ -1,430 +1,655 @@
-// /*
+/*
 
-// 	Implement your CUDA kernel in this file
+	Implement your CUDA kernel in this file
 
-// */
+*/
 
 
 
-// /* 
-//  * Solves the Panfilov model using an explicit numerical scheme.
-//  * Based on code orginally provided by Xing Cai, Simula Research Laboratory 
-//  * and reimplementation by Scott B. Baden, UCSD
-//  * 
-//  * Modified and  restructured by Didem Unat, Koc University
-//  *
-//  * Refer to "Detailed Numerical Analyses of the Aliev-Panfilov Model on GPGPU"
-//  * https://www.simula.no/publications/detailed-numerical-analyses-aliev-panfilov-model-gpgpu
-//  * by Xing Cai, Didem Unat and Scott Baden
-//  *
-// */
+/* 
+ * Solves the Panfilov model using an explicit numerical scheme.
+ * Based on code orginally provided by Xing Cai, Simula Research Laboratory 
+ * and reimplementation by Scott B. Baden, UCSD
+ * 
+ * Modified and  restructured by Didem Unat, Koc University
+ *
+ * Refer to "Detailed Numerical Analyses of the Aliev-Panfilov Model on GPGPU"
+ * https://www.simula.no/publications/detailed-numerical-analyses-aliev-panfilov-model-gpgpu
+ * by Xing Cai, Didem Unat and Scott Baden
+ *
+*/
 
-// #include <stdio.h>
-// #include <assert.h>
-// #include <stdlib.h>
-// #include <iostream>
-// #include <iomanip>
-// #include <string.h>
-// #include <math.h>
-// #include <sys/time.h>
-// #include <getopt.h>
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <iostream>
+#include <iomanip>
+#include <string.h>
+#include <math.h>
+#include <sys/time.h>
+#include <getopt.h>
 
-// using namespace std;
+using namespace std;
 
-// // External functions
-// extern "C" void splot(double **E, double T, int niter, int m, int n);
+#define TILE_DIM 24
 
-// void cmdLine(int argc, char *argv[], double &T, int &n, int &px, int &py, int &plot_freq, int &no_comm, int &num_threads);
 
-// // Utilities
-// //
+// External functions
+//extern "C" void splot(double **E, double T, int niter, int m, int n);
 
-// // Timer
-// // Make successive calls and take a difference to get the elapsed time.
-// static const double kMicro = 1.0e-6;
+void cmdLine(int argc, char *argv[], double &T, int &n, int &px, int &py, int &plot_freq, int &no_comm, int &num_threads){
+	/// Command line arguments
+	// Default value of the domain sizes
+	static struct option long_options[] = {
+		{"n", required_argument, 0, 'n'},
+		{"px", required_argument, 0, 'x'},
+		{"py", required_argument, 0, 'y'},
+		{"tfinal", required_argument, 0, 't'},
+		{"plot", required_argument, 0, 'p'},
+		{"nocomm", no_argument, 0, 'k'},
+		{"numthreads", required_argument, 0, 'o'},
+	};
+	// Process command line arguments
+	int ac;
+	for (ac = 1; ac < argc; ac++)
+	{
+		int c;
+		while ((c = getopt_long(argc, argv, "n:x:y:t:kp:o:", long_options, NULL)) != -1)
+		{
+			switch (c)
+			{
 
-// double getTime(){
-// 	struct timeval TV;
-// 	struct timezone TZ;
+				// Size of the computational box
+			case 'n':
+				n = atoi(optarg);
+				break;
 
-// 	const int RC = gettimeofday(&TV, &TZ);
-// 	if (RC == -1)
-// 	{
-// 		cerr << "ERROR: Bad call to gettimeofday" << endl;
-// 		return (-1);
-// 	}
+				// X processor geometry
+			case 'x':
+				px = atoi(optarg);
 
-// 	return (((double)TV.tv_sec) + kMicro * ((double)TV.tv_usec));
+				// Y processor geometry
+			case 'y':
+				py = atoi(optarg);
 
-// } 
+				// Length of simulation, in simulated time units
+			case 't':
+				T = atof(optarg);
+				break;
+				// Turn off communication
+			case 'k':
+				no_comm = 1;
+				break;
 
-// // end getTime()
+				// Plot the excitation variable
+			case 'p':
+				plot_freq = atoi(optarg);
+				break;
 
-// // Allocate a 2D array
-// double **alloc2D(int m, int n){
-// 	double **E;
-// 	int nx = n, ny = m;
-// 	E = (double **)malloc(sizeof(double *) * ny + sizeof(double) * nx * ny);
-// 	assert(E);
-// 	int row;
-// 	for (row = 0; row < ny; row++)
-// 		E[row] = (double *)(E + ny) + row * nx;
-// 	return (E);
-// }
+				// Plot the excitation variable
+			case 'o':
+				num_threads = atoi(optarg);
+				break;
 
-// // Reports statistics about the computation
-// // These values should not vary (except to within roundoff)
-// // when we use different numbers of  processes to solve the problem
-// double stats(double **E, int m, int n, double *_mx){
-// 	double mx = -1;
-// 	double l2norm = 0;
-// 	int col, row;
-// 	for (row = 1; row <= m; row++)
-// 		for (col = 1; col <= n; col++)
-// 		{
-// 			l2norm += E[row][col] * E[row][col];
-// 			if (E[row][col] > mx)
-// 				mx = E[row][col];
-// 		}
-// 	*_mx = mx;
-// 	l2norm /= (double)((m) * (n));
-// 	l2norm = sqrt(l2norm);
-// 	return l2norm;
-// }
+				// Error
+			default:
+				printf("Usage: a.out [-n <domain size>] [-t <final time >]\n\t [-p <plot frequency>]\n\t[-px <x processor geometry> [-py <y proc. geometry] [-k turn off communication] [-o <Number of OpenMP threads>]\n");
+				exit(-1);
+			}
+		}
+	}
+}
 
-// double stats1D(double *E, int m, int n, double *_mx, int WIDTH){
-// 	double mx = -1;
-// 	double l2norm = 0;
-// 	int col, row;
-// 	int index = -1;
-// 	for (row = 1; row <= m; row++) {
-// 		for (col = 1; col <= n; col++){
-// 			index = row * WIDTH + col;
-// 			l2norm += E[index] * E[index];
-// 			if (E[index] > mx) {
-// 				mx = E[index];
-// 			}
-// 		}
-// 	}
+// Utilities
+//
+
+// Timer
+// Make successive calls and take a difference to get the elapsed time.
+static const double kMicro = 1.0e-6;
+
+double getTime(){
+	struct timeval TV;
+	struct timezone TZ;
+
+	const int RC = gettimeofday(&TV, &TZ);
+	if (RC == -1)
+	{
+		cerr << "ERROR: Bad call to gettimeofday" << endl;
+		return (-1);
+	}
+
+	return (((double)TV.tv_sec) + kMicro * ((double)TV.tv_usec));
+
+} 
+
+// end getTime()
+
+// Allocate a 2D array
+double **alloc2D(int m, int n){
+	double **E;
+	int nx = n, ny = m;
+	E = (double **)malloc(sizeof(double *) * ny + sizeof(double) * nx * ny);
+	assert(E);
+	int row;
+	for (row = 0; row < ny; row++)
+		E[row] = (double *)(E + ny) + row * nx;
+	return (E);
+}
+
+// Reports statistics about the computation
+// These values should not vary (except to within roundoff)
+// when we use different numbers of  processes to solve the problem
+double stats(double **E, int m, int n, double *_mx){
+	double mx = -1;
+	double l2norm = 0;
+	int col, row;
+	for (row = 1; row <= m; row++)
+		for (col = 1; col <= n; col++)
+		{
+			l2norm += E[row][col] * E[row][col];
+			if (E[row][col] > mx)
+				mx = E[row][col];
+		}
+	*_mx = mx;
+	l2norm /= (double)((m) * (n));
+	l2norm = sqrt(l2norm);
+	return l2norm;
+}
+
+double stats1D(double *E, int m, int n, double *_mx, int WIDTH){
+	double mx = -1;
+	double l2norm = 0;
+	int col, row;
+	int index = -1;
+	for (row = 1; row <= m; row++) {
+		for (col = 1; col <= n; col++){
+			index = row * WIDTH + col;
+			l2norm += E[index] * E[index];
+			if (E[index] > mx) {
+				mx = E[index];
+			}
+		}
+	}
 		
-// 	*_mx = mx;
-// 	l2norm /= (double)((m) * (n));
-// 	l2norm = sqrt(l2norm);
-// 	return l2norm;
-// }
+	*_mx = mx;
+	l2norm /= (double)((m) * (n));
+	l2norm = sqrt(l2norm);
+	return l2norm;
+}
 
-// void simulate(double **E, double **E_prev, double **R, const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH){
+__global__ void simulate_version1_PDE(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH){
+   
+  int RADIUS = 1;
+  int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+  int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+
+  if (row >=1 && row <= m && col >=1 && col <= n) {
+	E_1D[row*WIDTH+col] = E_prev_1D[row*WIDTH+col] + alpha * (E_prev_1D[row*WIDTH+(col+1)] + E_prev_1D[row*WIDTH + (col-1)] - 4 * E_prev_1D[row*WIDTH+ col] + E_prev_1D[(row + 1)*WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+  }   
+}
+
+
+__global__ void simulate_version1_ODE(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH){
+   
+	int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+
+	int index = row * WIDTH + col;
+
+	if (row >=1 && row <= m && col >=1 && col <= n) {
+		E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
+
+		R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
+	}
+}
+
+
+__global__ void simulate_version2(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH){
+   
+	int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+
+	int index = row * WIDTH + col;
+
+	if (row >=1 && row <= m && col >=1 && col <= n) {
+		
+		// PDE
+		E_1D[row*WIDTH+col] = E_prev_1D[row*WIDTH+col] + alpha * (E_prev_1D[row*WIDTH+(col+1)] + E_prev_1D[row*WIDTH + (col-1)] - 4 * E_prev_1D[row*WIDTH+ col] + E_prev_1D[(row + 1)*WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+		
+		//ODE
+		E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
+
+		R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
+	}
+}
+
+__global__ void simulate_version3(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH){
+   
+	int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+
+	int index = row * WIDTH + col;
+
+	if (row >=1 && row <= m && col >=1 && col <= n) {
+		
+		// PDE
+		E_1D[row*WIDTH+col] = E_prev_1D[row*WIDTH+col] + alpha * (E_prev_1D[row*WIDTH+(col+1)] + E_prev_1D[row*WIDTH + (col-1)] - 4 * E_prev_1D[row*WIDTH+ col] + E_prev_1D[(row + 1)*WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+
+		double e_temp = E_1D[index];
+		double r_temp = R_1D[index]; 
+		
+		//ODE
+		e_temp = e_temp - dt * (kk * e_temp * (e_temp - a) * (e_temp - 1) + e_temp * r_temp);
+
+		r_temp = r_temp + dt * (epsilon + M1 * r_temp / (e_temp + M2)) * (-r_temp - kk * e_temp * (e_temp - b - 1));
+
+		E_1D[index] = e_temp;
+		R_1D[index] = r_temp;
+
+	}
+}
+
+void simv1(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH, double* d_E_1D, double* d_E_prev_1D, double* d_R_1D){
 	
-// 	int col, row;
-// 	/* 
-// 	* Copy data from boundary of the computational box 
-// 	* to the padding region, set up for differencing
-// 	* on the boundary of the computational box
-// 	* Using mirror boundaries
-// 	*/
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
 
-// 	for (row = 1; row <= m; row++) {
-// 		E_prev[row][0] = E_prev[row][2];
-// 		E_prev_1D[row* WIDTH + 0] = E_prev_1D[row*WIDTH + 2];
-// 	}
+	// ============ PDE Kernel ====
+    cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+    simulate_version1_PDE<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 
-//     cout<< "check 2"<<endl;
+	// ============ ODE Kernel =======
+	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+    cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
 	
-// 	for (row = 1; row <= m; row++) {
-// 		E_prev[row][n + 1] = E_prev[row][n - 1];
-// 		E_prev_1D[row*WIDTH+ (n+1)] = E_prev_1D[row*WIDTH + (n-1)];
-// 	}
+	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	
+	cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(R_1D ,d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	
+}
 
-//     cout<< "check 3"<<endl;
+void simv2 (const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH, double* d_E_1D, double* d_E_prev_1D, double* d_R_1D){
 
-// 	for (col = 1; col <= n; col++) {
-// 		E_prev[0][col] = E_prev[2][col];
-// 		E_prev_1D[0*WIDTH+col] = E_prev_1D[2*WIDTH+ col];
-// 	}
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
 
-//     cout<< "check 4"<<endl;
+	// Copy to GPU
+	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+	
+	// Kernel Launch
+	simulate_version2<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
 
-// 	for (col = 1; col <= n; col++) {
-// 		E_prev[m + 1][col] = E_prev[m - 1][col];
-// 		E_prev_1D[(m+1)*WIDTH+ col] = E_prev_1D[(m-1)*WIDTH+ col];
-// 	}
+	// copy to Host
+	//cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(R_1D ,d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 
-//     cout<< "check 5"<<endl;
+}
 
-// 	// Solve for the excitation, the PDE
-// 	for (row = 1; row <= m; row++){
-// 		for (col = 1; col <= n; col++){
-// 			cout<< "Check 5.1"<<endl;
-//             E[row][col] = E_prev[row][col] + alpha * (E_prev[row][col + 1] + E_prev[row][col - 1] - 4 * E_prev[row][col] + E_prev[row + 1][col] + E_prev[row - 1][col]);
+void simv3 (const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH, double* d_E_1D, double* d_E_prev_1D, double* d_R_1D){
+
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
+
+	// Copy to GPU
+	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+	
+	// Kernel Launch
+	simulate_version3<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+
+	// copy to Host
+	//cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(R_1D ,d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+
+}
+
+void simv4 (const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH, double* d_E_1D, double* d_E_prev_1D, double* d_R_1D){
+
+}
+
+void mirrorBoundries(double* E_prev_1D, const int n, const int m, const int WIDTH) {
+	int col, row;
+	/* 
+	* Copy data from boundary of the computational box 
+	* to the padding region, set up for differencing
+	* on the boundary of the computational box
+	* Using mirror boundaries
+	*/
+
+	for (row = 1; row <= m; row++) {
+		//E_prev[row][0] = E_prev[row][2];
+		E_prev_1D[row* WIDTH + 0] = E_prev_1D[row*WIDTH + 2];
+	}
+	
+	for (row = 1; row <= m; row++) {
+		//E_prev[row][n + 1] = E_prev[row][n - 1];
+		E_prev_1D[row*WIDTH+ (n+1)] = E_prev_1D[row*WIDTH + (n-1)];
+	}
+
+	for (col = 1; col <= n; col++) {
+		//E_prev[0][col] = E_prev[2][col];
+		E_prev_1D[0*WIDTH+col] = E_prev_1D[2*WIDTH+ col];
+	}
+
+	for (col = 1; col <= n; col++) {
+		//E_prev[m + 1][col] = E_prev[m - 1][col];
+		E_prev_1D[(m+1)*WIDTH+ col] = E_prev_1D[(m-1)*WIDTH+ col];
+	}
+
+}
+
+
+void simulate(double **E, double **E_prev, double **R, const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double* E_1D, double* E_prev_1D, double* R_1D, int WIDTH, double* d_E_1D, double* d_E_prev_1D, double* d_R_1D){
+	
+	int col, row;
+	/* 
+	* Copy data from boundary of the computational box 
+	* to the padding region, set up for differencing
+	* on the boundary of the computational box
+	* Using mirror boundaries
+	*/
+
+	for (row = 1; row <= m; row++) {
+		E_prev[row][0] = E_prev[row][2];
+		E_prev_1D[row* WIDTH + 0] = E_prev_1D[row*WIDTH + 2];
+	}
+	
+	for (row = 1; row <= m; row++) {
+		E_prev[row][n + 1] = E_prev[row][n - 1];
+		E_prev_1D[row*WIDTH+ (n+1)] = E_prev_1D[row*WIDTH + (n-1)];
+	}
+
+	for (col = 1; col <= n; col++) {
+		E_prev[0][col] = E_prev[2][col];
+		E_prev_1D[0*WIDTH+col] = E_prev_1D[2*WIDTH+ col];
+	}
+
+	for (col = 1; col <= n; col++) {
+		E_prev[m + 1][col] = E_prev[m - 1][col];
+		E_prev_1D[(m+1)*WIDTH+ col] = E_prev_1D[(m-1)*WIDTH+ col];
+    }
+    
+    // ================ Kernel Setup ==============
+    const dim3 block_size(TILE_DIM, TILE_DIM);
+    const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+    int Total_Bytes = WIDTH * WIDTH * sizeof(double);
+    
+    // =================================================
+
+	// Solve for the excitation, the PDE
+	for (row = 1; row <= m; row++){
+		for (col = 1; col <= n; col++){
+            E[row][col] = E_prev[row][col] + alpha * (E_prev[row][col + 1] + E_prev[row][col - 1] - 4 * E_prev[row][col] + E_prev[row + 1][col] + E_prev[row - 1][col]);
             
-//             cout<< "Check 5.1"<<endl;
+			//E_1D[row*WIDTH+col] = E_prev_1D[row*WIDTH+col] + alpha * (E_prev_1D[row*WIDTH+(col+1)] + E_prev_1D[row*WIDTH + (col-1)] - 4 * E_prev_1D[row*WIDTH+ col] + E_prev_1D[(row + 1)*WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+		}
+	}
+
+	// // ======================== Kernel version of PDE ====
+    cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+    simulate_version1_PDE<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	//===========
 
 
-// 			// E_1D[row*WIDTH+col] = E_prev_1D[row*WIDTH+col] + alpha * (E_prev_1D[row*WIDTH+(col+1)] + E_prev_1D[row*WIDTH + (col-1)] - 4 * E_prev_1D[row*WIDTH+ col] + E_prev_1D[(row + 1)*WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
-// 		}
-// 	}
-
-//     cout<< "check 6"<<endl;
-
-// 	/* 
-// 	* Solve the ODE, advancing excitation and recovery to the
-// 	*     next timtestep
-// 	*/
-// 	int index = -1;
-// 	for (row = 1; row <= m; row++){
-// 		for (col = 1; col <= n; col++) {
-// 			E[row][col] = E[row][col] - dt * (kk * E[row][col] * (E[row][col] - a) * (E[row][col] - 1) + E[row][col] * R[row][col]);
-// 			index = row * WIDTH + col;	
-// 			E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
-
-// 		}
-// 	}
-
-//     cout<< "check 7"<<endl;
-
-// 	for (row = 1; row <= m; row++){
-// 		for (col = 1; col <= n; col++) {
+	/* 
+	* Solve the ODE, advancing excitation and recovery to the
+	*     next timtestep
+	*/
+	//int index = -1;
+	for (row = 1; row <= m; row++){
+		for (col = 1; col <= n; col++) {
+			E[row][col] = E[row][col] - dt * (kk * E[row][col] * (E[row][col] - a) * (E[row][col] - 1) + E[row][col] * R[row][col]);
 			
-// 			R[row][col] = R[row][col] + dt * (epsilon + M1 * R[row][col] / (E[row][col] + M2)) * (-R[row][col] - kk * E[row][col] * (E[row][col] - b - 1));
+			//index = row * WIDTH + col;	
+			
+			//E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
 
-// 			index =  row * WIDTH + col;
-// 			R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
-// 		}
-// 	}
+		}
+	}
 
-// }
-
-// // Main program
-// int main(int argc, char **argv){
-// 	/*
-// 	*  Solution arrays
-// 	*   E is the "Excitation" variable, a voltage
-// 	*   R is the "Recovery" variable
-// 	*   E_prev is the Excitation variable for the previous timestep,
-// 	*      and is used in time integration
-// 	*/
-//     cout<< "\n Hello I am waris"<<endl;
-// 	double **E, **R, **E_prev;
-
-// 	double * E_1D, *R_1D, *E_prev_1D; 
-
-// 	// Various constants - these definitions shouldn't change
-// 	const double a = 0.1, b = 0.1, kk = 8.0, M1 = 0.07, M2 = 0.3, epsilon = 0.01, d = 5e-5;
-
-// 	double T = 1000.0;
-// 	int m = 200, n = 200;
-// 	int plot_freq = 0;
-// 	int px = 1, py = 1;
-// 	int no_comm = 0;
-// 	int num_threads = 1;
-// 	int WIDTH;
-
-// 	int size;
-
-// 	cmdLine(argc, argv, T, n, px, py, plot_freq, no_comm, num_threads);
-// 	m = n;
-// 	// Allocate contiguous memory for solution arrays
-// 	// The computational box is defined on [1:m+1,1:n+1]
-// 	// We pad the arrays in order to facilitate differencing on the
-// 	// boundaries of the computation box
-// 	size = (m+2) * (n+2);
-// 	WIDTH =  m+2;
-
-
-// 	E = alloc2D(m + 2, n + 2);
-// 	E_prev = alloc2D(m + 2, n + 2);
-// 	R = alloc2D(m + 2, n + 2);
 	
-// 	E_1D = (double *) malloc (size);
-// 	E_prev_1D = (double *) malloc (size);
-// 	R_1D = (double *) malloc (size);
 
+	for (row = 1; row <= m; row++){
+		for (col = 1; col <= n; col++) {
+			
+			R[row][col] = R[row][col] + dt * (epsilon + M1 * R[row][col] / (E[row][col] + M2)) * (-R[row][col] - kk * E[row][col] * (E[row][col] - b - 1));
 
-// 	int col, row;
-// 	// Initialization
+			//index =  row * WIDTH + col;
+			//R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
+		}
+	}
+
+	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
+    cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice) ;
 	
-// 	for (row = 1; row <= m; row++) {
-// 		for (col = 1; col <= n; col++) {
-// 			E_prev[row][col] = 0;
-// 			R[row][col] = 0;
-// 			E_prev_1D[row*WIDTH + col] = 0;
-// 			R_1D[row*WIDTH + col] = 0;
-// 		}
-// 	}
-		
-// 	for (row = 1; row <= m; row++) {
-// 		for (col = n / 2 + 1; col <= n; col++) {
-// 			E_prev[row][col] = 1.0;
-// 			E_prev_1D[row*WIDTH + col] = 1.0;
-// 		}
-// 	}
-		
-// 	for (row = m / 2 + 1; row <= m; row++) {
-// 		for (col = 1; col <= n; col++) {
-// 			R[row][col] = 1.0;
-// 			R_1D[row*WIDTH + col] = 1.0;
-// 		}
-// 	}
-
-//     cout<< "check 1"<<endl;
-		
-
-// 	double dx = 1.0 / n;
-
-// 	// For time integration, these values shouldn't change
-// 	double rp = kk * (b + 1) * (b + 1) / 4;
-// 	double dte = (dx * dx) / (d * 4 + ((dx * dx)) * (rp + kk));
-// 	double dtr = 1 / (epsilon + ((M1 / M2) * rp));
-// 	double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
-// 	double alpha = d * dt / (dx * dx);
-
-// 	cout << "Grid Size       : " << n << endl;
-// 	cout << "Duration of Sim : " << T << endl;
-// 	cout << "Time step dt    : " << dt << endl;
-// 	cout << "Process geometry: " << px << " x " << py << endl;
+	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
 	
-// 	if (no_comm) {
-// 		cout << "Communication   : DISABLED" << endl;
-// 	}
+	cudaMemcpy(E_1D ,d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(R_1D ,d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	
+}
 
-// 	cout << endl;
 
-// 	// Start the timer
-// 	double t0 = getTime();
+// Main program
+int main(int argc, char **argv){
+	/*
+	*  Solution arrays
+	*   E is the "Excitation" variable, a voltage
+	*   R is the "Recovery" variable
+	*   E_prev is the Excitation variable for the previous timestep,
+	*      and is used in time integration
+	*/
 
-// 	// Simulated time is different from the integer timestep number
-// 	// Simulated time
-// 	double t = 0.0;
-// 	// Integer timestep number
-// 	int niter = 0;
+	// cout<< "\n Hello I am waris"<<endl;
+	int devId = 0;
+	cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, devId);
+	printf("\nDevice : %s\n", prop.name);
+	
+	double **E, **R, **E_prev;
 
-// 	while (t < T){
+	double * E_1D, *R_1D, *E_prev_1D; 
 
-// 		t += dt;
-// 		niter++;
+    double *d_E_1D, *d_E_prev_1D, *d_R_1D;
 
-// 		simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b, E_1D, E_prev_1D, R_1D, WIDTH);
 
-// 		//swap current E with previous E
-// 		double **tmp = E;
-// 		E = E_prev;
-// 		E_prev = tmp;
+	// Various constants - these definitions shouldn't change
+	const double a = 0.1, b = 0.1, kk = 8.0, M1 = 0.07, M2 = 0.3, epsilon = 0.01, d = 5e-5;
 
-// 		if (plot_freq){
-// 			int k = (int)(t / plot_freq);
-// 			if ((t - k * plot_freq) < dt){
-// 				splot(E, t, niter, m + 2, n + 2);
-// 			}
-// 		}
+	double T = 1000.0;
+	int m = 200, n = 200;
+	int plot_freq = 0;
+	int px = 1, py = 1;
+	int no_comm = 0;
+	int num_threads = 1;
+	int WIDTH;
 
-// 	} //end of while loop
+	//int size;
 
-// 	double time_elapsed = getTime() - t0;
+	cmdLine(argc, argv, T, n, px, py, plot_freq, no_comm, num_threads);
+	m = n;
+	// Allocate contiguous memory for solution arrays
+	// The computational box is defined on [1:m+1,1:n+1]
+	// We pad the arrays in order to facilitate differencing on the
+	// boundaries of the computation box
+	int Total_Bytes = (m+2) * (n+2) *sizeof(double);
+	WIDTH =  m+2;
 
-// 	double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
-// 	double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
 
-// 	cout << "Number of Iterations        : " << niter << endl;
-// 	cout << "Elapsed Time (sec)          : " << time_elapsed << endl;
-// 	cout << "Sustained Gflops Rate       : " << Gflops << endl;
-// 	cout << "Sustained Bandwidth (GB/sec): " << BW << endl << endl;
+	E = alloc2D(m + 2, n + 2);
+	E_prev = alloc2D(m + 2, n + 2);
+	R = alloc2D(m + 2, n + 2);
 
-// 	double mx;
-// 	double l2norm = stats(E_prev, m, n, &mx);
-// 	cout << "Max: " << mx << " L2norm: " << l2norm << endl;
+	// Allocate space on the host
+	cudaError_t status = cudaMallocHost(&E_1D, Total_Bytes);
+	status = cudaMallocHost(&E_prev_1D, Total_Bytes);
+	status = cudaMallocHost(&R_1D, Total_Bytes);
 
-// 	l2norm = stats1D(E_prev_1D, m, n, &mx, WIDTH);
-// 	cout << "1D Max : " << mx << " 1D L2norm: " << l2norm << endl;
+	
+	if (status != cudaSuccess)
+  		printf("Error allocating pinned host memory\n");
+	// E_1D = (double *) malloc (Total_Bytes);
+	// E_prev_1D = (double *) malloc (Total_Bytes);
+    // R_1D = (double *) malloc (Total_Bytes);
+	
+	// Allocate space on the GPU
+    cudaMalloc( &d_E_1D, Total_Bytes) ;
+    cudaMalloc( &d_E_prev_1D,Total_Bytes) ;
+    cudaMalloc(&d_R_1D, Total_Bytes);
+    
 
-// 	if (plot_freq){
-// 		cout << "\n\nEnter any input to close the program and the plot..." << endl;
-// 		getchar();
-// 	}
 
-// 	free(E);
-// 	free(E_prev);
-// 	free(R);
+	int col, row;
+	// Initialization
+	
+	for (row = 1; row <= m; row++) {
+		for (col = 1; col <= n; col++) {
+			E_prev[row][col] = 0;
+			R[row][col] = 0;
+			E_prev_1D[row*WIDTH + col] = 0;
+			R_1D[row*WIDTH + col] = 0;
+		}
+	}
+		
+	for (row = 1; row <= m; row++) {
+		for (col = n / 2 + 1; col <= n; col++) {
+			E_prev[row][col] = 1.0;
+			E_prev_1D[row*WIDTH + col] = 1.0;
+		}
+	}
+		
+	for (row = m / 2 + 1; row <= m; row++) {
+		for (col = 1; col <= n; col++) {
+			R[row][col] = 1.0;
+			R_1D[row*WIDTH + col] = 1.0;
+		}
+	}
 
-// 	free(E_1D);
-// 	free(E_prev_1D);
-// 	free(R_1D);
+    //cout<< "check 1"<<endl;
+		
 
-// 	return 0;
-// }
+	double dx = 1.0 / n;
 
-// void cmdLine(int argc, char *argv[], double &T, int &n, int &px, int &py, int &plot_freq, int &no_comm, int &num_threads){
-// 	/// Command line arguments
-// 	// Default value of the domain sizes
-// 	static struct option long_options[] = {
-// 		{"n", required_argument, 0, 'n'},
-// 		{"px", required_argument, 0, 'x'},
-// 		{"py", required_argument, 0, 'y'},
-// 		{"tfinal", required_argument, 0, 't'},
-// 		{"plot", required_argument, 0, 'p'},
-// 		{"nocomm", no_argument, 0, 'k'},
-// 		{"numthreads", required_argument, 0, 'o'},
-// 	};
-// 	// Process command line arguments
-// 	int ac;
-// 	for (ac = 1; ac < argc; ac++)
-// 	{
-// 		int c;
-// 		while ((c = getopt_long(argc, argv, "n:x:y:t:kp:o:", long_options, NULL)) != -1)
-// 		{
-// 			switch (c)
-// 			{
+	// For time integration, these values shouldn't change
+	double rp = kk * (b + 1) * (b + 1) / 4;
+	double dte = (dx * dx) / (d * 4 + ((dx * dx)) * (rp + kk));
+	double dtr = 1 / (epsilon + ((M1 / M2) * rp));
+	double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
+	double alpha = d * dt / (dx * dx);
 
-// 				// Size of the computational box
-// 			case 'n':
-// 				n = atoi(optarg);
-// 				break;
+	cout << "Grid Size       : " << n << endl;
+	cout << "Duration of Sim : " << T << endl;
+	cout << "Time step dt    : " << dt << endl;
+	cout << "Process geometry: " << px << " x " << py << endl;
+	
+	if (no_comm) {
+		cout << "Communication   : DISABLED" << endl;
+	}
 
-// 				// X processor geometry
-// 			case 'x':
-// 				px = atoi(optarg);
+	cout << endl;
 
-// 				// Y processor geometry
-// 			case 'y':
-// 				py = atoi(optarg);
+	// Start the timer
+	double t0 = getTime();
 
-// 				// Length of simulation, in simulated time units
-// 			case 't':
-// 				T = atof(optarg);
-// 				break;
-// 				// Turn off communication
-// 			case 'k':
-// 				no_comm = 1;
-// 				break;
+	// Simulated time is different from the integer timestep number
+	// Simulated time
+	double t = 0.0;
+	// Integer timestep number
+	int niter = 0;
 
-// 				// Plot the excitation variable
-// 			case 'p':
-// 				plot_freq = atoi(optarg);
-// 				break;
+	while (t < T){
 
-// 				// Plot the excitation variable
-// 			case 'o':
-// 				num_threads = atoi(optarg);
-// 				break;
+		t += dt;
+		niter++;
 
-// 				// Error
-// 			default:
-// 				printf("Usage: a.out [-n <domain size>] [-t <final time >]\n\t [-p <plot frequency>]\n\t[-px <x processor geometry> [-py <y proc. geometry] [-k turn off communication] [-o <Number of OpenMP threads>]\n");
-// 				exit(-1);
-// 			}
-// 		}
-// 	}
-// }
-// /* **********************************************************
-// *  Author : Urvashi R.V. [04/06/2004]
-// *      Modified by Didem Unat [03/23/18]
-// *************************************************************/
+		mirrorBoundries(E_prev_1D, n, m, WIDTH);
 
-// #include <stdio.h>
+		//simulate(E, E_prev, R, alpha, n, m, kk, dt, a, epsilon, M1, M2, b, E_1D, E_prev_1D, R_1D, WIDTH, d_E_1D, d_E_prev_1D, d_R_1D);
 
-// /* Function to plot the 2D array
-// * 'gnuplot' is instantiated via a pipe and 
-// * the values to be plotted are passed through, along 
-// * with gnuplot commands */
+		simv3(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, E_1D, E_prev_1D, R_1D, WIDTH, d_E_1D, d_E_prev_1D, d_R_1D);
+
+		//swap current E with previous E
+		double **tmp = E;
+		E = E_prev;
+		E_prev = tmp;
+
+		double *tmp2 = E_1D;
+		E_1D = E_prev_1D;
+		E_prev_1D = tmp2;
+
+
+		// if (plot_freq){
+		// 	int k = (int)(t / plot_freq);
+		// 	if ((t - k * plot_freq) < dt){
+		// 		splot(E, t, niter, m + 2, n + 2);
+		// 	}
+		// }
+
+	} //end of while loop
+
+	double time_elapsed = getTime() - t0;
+
+	double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
+	double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
+
+	cout << "Number of Iterations        : " << niter << endl;
+	cout << "Elapsed Time (sec)          : " << time_elapsed << endl;
+	cout << "Sustained Gflops Rate       : " << Gflops << endl;
+	cout << "Sustained Bandwidth (GB/sec): " << BW << endl << endl;
+
+	double mx;
+	double l2norm = stats(E_prev, m, n, &mx);
+	cout << "Max: " << mx << " L2norm: " << l2norm << endl;
+
+	l2norm = stats1D(E_prev_1D, m, n, &mx, WIDTH);
+	cout << "1D Max : " << mx << " 1D L2norm: " << l2norm << endl;
+
+	// if (plot_freq){
+	// 	cout << "\n\nEnter any input to close the program and the plot..." << endl;
+	// 	getchar();
+	// }
+
+	free(E);
+	free(E_prev);
+	free(R);
+
+	cudaFreeHost(E_1D);
+	cudaFreeHost(E_prev_1D);
+	cudaFreeHost(R_1D);
+
+	cudaFree(d_E_1D);
+    cudaFree(d_E_prev_1D);
+    cudaFree(d_R_1D);
+
+	return 0;
+}
+
+
+/* **********************************************************
+*  Author : Urvashi R.V. [04/06/2004]
+*      Modified by Didem Unat [03/23/18]
+*************************************************************/
+
+//#include <stdio.h>
+
+/* Function to plot the 2D array
+* 'gnuplot' is instantiated via a pipe and 
+* the values to be plotted are passed through, along 
+* with gnuplot commands */
 
 // FILE *gnu = NULL;
 
