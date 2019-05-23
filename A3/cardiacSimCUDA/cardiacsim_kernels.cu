@@ -41,6 +41,7 @@ double getTime();
 double **alloc2D(int m, int n);
 // Mirror Ghost Boundries
 void mirrorBoundries(double *E_prev_1D, const int n, const int m, const int WIDTH);
+void mirrorBoundries(double *E_prev_1D, double* d_E_prev_1D, const int n, const int m, const int WIDTH);
 /* 
 	Reports statistics about the computation
 	These values should not vary (except to within roundoff)
@@ -176,114 +177,79 @@ __global__ void simulate_version4(const double alpha, const int n, const int m, 
 	}
 }
 
-void simv1(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+void simv1(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
+	//int Total_Bytes = WIDTH * WIDTH * sizeof(double);
 
 	// ============ PDE Kernel ====
-	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
+	//cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
 
 	// Start the timer
 	double t0 = getTime();
 	simulate_version1_PDE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaDeviceSynchronize();
+	//cudaDeviceSynchronize();
+	
+	// end timer
+	//double time_elapsed = getTime() - t0;
+	//*time += time_elapsed;
+
+	//cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+
+	// ============ ODE Kernel =======
+	//cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
+	//cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
+
+	// Start the timer
+	//t0 = getTime();
+
+	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaStreamSynchronize(0);
 	
 	// end timer
 	double time_elapsed = getTime() - t0;
 	*time += time_elapsed;
 
-	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
-
-	// ============ ODE Kernel =======
-	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
-
-	// Start the timer
-	t0 = getTime();
-
-	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaDeviceSynchronize();
-	
-	// end timer
-	time_elapsed = getTime() - t0;
-	*time += time_elapsed;
-
-	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
-	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	// cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	// cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
 
-void simv2(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+void simv2(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
-
-	// Copy to GPU
-	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
-
-		
-	// Kernel Launch
 	
 	// Start the timer
 	double t0 = getTime();
 
 	simulate_version2<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaDeviceSynchronize();
+	cudaStreamSynchronize(0);
 
 	double time_elapsed = getTime() - t0;
 	*time += time_elapsed;
-
-	// copy to Host
-	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
-	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
 
-void simv3(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+void simv3(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
-
-	// Copy to GPU
-	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
-
 		
-	// Kernel Launch
-	
 	// Start the timer
 	double t0 = getTime();
 
 	simulate_version3<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaDeviceSynchronize();
-
+	cudaStreamSynchronize(0);
 	double time_elapsed = getTime() - t0;
 	*time += time_elapsed;
 
-	// copy to Host
-	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
-	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
 
 
-void simv4(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+void simv4(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
-
-	// Copy to GPU
-	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
-
-		
-	// Kernel Launch
 	
 	// Start the timer
 	double t0 = getTime();
@@ -293,11 +259,31 @@ void simv4(const double alpha, const int n, const int m,  const double dt, doubl
 	double time_elapsed = getTime() - t0;
 	*time += time_elapsed;
 	
+}
 
-	// copy to Host
-	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+__global__ void mirrorkernel(double *E_prev_1D, const int n, const int m, const int WIDTH){
+
+	/* 
+	* Copy data from boundary of the computational box 
+	* to the padding region, set up for differencing
+	* on the boundary of the computational box
+	* Using mirror boundaries
+	*/
+
+	//int col, row;
+	size_t row = blockIdx.y * blockDim.y + threadIdx.y + 1;
+	size_t col = blockIdx.x * blockDim.x + threadIdx.x + 1;
 	
-	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	if (row <= m) {
+		E_prev_1D[row * WIDTH + 0] = E_prev_1D[row * WIDTH + 2];
+		E_prev_1D[row * WIDTH + (n + 1)] = E_prev_1D[row * WIDTH + (n - 1)];
+	}
+	
+	if (col <= n) {
+
+		E_prev_1D[0 * WIDTH + col] = E_prev_1D[2 * WIDTH + col];
+		E_prev_1D[(m + 1) * WIDTH + col] = E_prev_1D[(m - 1) * WIDTH + col];
+	}
 }
 
 // Main Refined -- Versioin 4 Refined --
@@ -429,29 +415,37 @@ int main(int argc, char **argv)
 	double t = 0.0;
 	// Integer timestep number
 	int niter = 0;
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
 	
-	
-
+	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
+	// very well done
 	while (t < T)
 	{
 
 		t += dt;
 		niter++;
 
-		mirrorBoundries(E_prev_1D, n, m, WIDTH);
-
+		//mirrorBoundries(E_prev_1D, n, m, WIDTH);
+		//mirrorBoundries(E_prev_1D, d_E_prev_1D,n, m, WIDTH);
+		mirrorkernel<<<num_blocks, block_size>>>(d_E_prev_1D, n, m ,WIDTH);
+		cudaStreamSynchronize(0);
+		//cudaMemcpy(E_prev_1D, d_E_prev_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 		switch (version){
 			case 1:
-				simv1(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
+				simv1(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 2:
-				simv2(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
+				simv2(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 3:
-				simv3(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
+				simv3(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 4:
-				simv4(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
+				
+				simv4(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
+				
 				break;
 			case 0:
 			cout<<"\n Implement the Serial Version"<<endl;		
@@ -462,18 +456,21 @@ int main(int argc, char **argv)
 				
 		}
 		
+		//cudaMemcpy(d_E_prev_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToDevice);
 
 		//swap current E with previous E
 		double **tmp = E;
 		E = E_prev;
 		E_prev = tmp;
 
-		double *tmp2 = E_1D;
-		E_1D = E_prev_1D;
-		E_prev_1D = tmp2;
+		double *tmp2 = d_E_1D;
+		d_E_1D = d_E_prev_1D;
+		d_E_prev_1D = tmp2;
 
 	} //end of while loop
 
+	cudaMemcpy(E_prev_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	
 	//double time_elapsed = getTime() - t0;
 
 	double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
@@ -506,6 +503,27 @@ int main(int argc, char **argv)
 }
 
 //================================================== Utilities =========================================
+
+
+
+// Mirror Ghost Boundries
+void mirrorBoundries(double *E_prev_1D, double* d_E_prev_1D, const int n, const int m, const int WIDTH){
+	
+	// ==================================================
+
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	int Total_Bytes = WIDTH * WIDTH * sizeof(double);
+
+	// Copy to GPU
+	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
+		
+	mirrorkernel<<<num_blocks, block_size>>>(d_E_prev_1D, n, m ,WIDTH);
+				
+	cudaMemcpy(E_prev_1D, d_E_prev_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+}
+
+
 
 // Mirror Ghost Boundries
 void mirrorBoundries(double *E_prev_1D, const int n, const int m, const int WIDTH)
