@@ -23,6 +23,15 @@
 using namespace std;
 
 #define TILE_DIM 16
+#define kk  8.0  
+#define a 0.1 
+#define epsilon 0.01 
+#define M1 0.07 
+#define M2 0.3 
+#define b  0.1
+#define d  5e-5
+
+
 
 // For Command Line Args
 void cmdLine(int argc, char *argv[], double &T, int &n, int &px, int &py, int &plot_freq, int &no_comm, int &num_threads);
@@ -41,8 +50,8 @@ double stats(double **E, int m, int n, double *_mx);
 double stats1D(double *E, int m, int n, double *_mx, int WIDTH);
 
 
-// ============================== Kernels  ===========================
-__global__ void simulate_version1_PDE(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH)
+// // ============================== Kernels  ===========================
+__global__ void simulate_version1_PDE(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
 {
 
 	int RADIUS = 1;
@@ -55,7 +64,7 @@ __global__ void simulate_version1_PDE(const double alpha, const int n, const int
 	}
 }
 
-__global__ void simulate_version1_ODE(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH)
+__global__ void simulate_version1_ODE(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
 {
 	int RADIUS = 1;
 	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
@@ -69,7 +78,7 @@ __global__ void simulate_version1_ODE(const double alpha, const int n, const int
 	}
 }
 
-__global__ void simulate_version2(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH)
+__global__ void simulate_version2(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
 {
 	int RADIUS = 1;
 	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
@@ -89,7 +98,7 @@ __global__ void simulate_version2(const double alpha, const int n, const int m, 
 	}
 }
 
-__global__ void simulate_version3(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH)
+__global__ void simulate_version3(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
 {
 	int RADIUS = 1;
 	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
@@ -113,73 +122,61 @@ __global__ void simulate_version3(const double alpha, const int n, const int m, 
 	}
 }
 
-__global__ void simulate_version4(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH)
+
+__global__ void simulate_version4(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
 {
-	// Shared Memory Allocation
-	__shared__ double tempR[TILE_DIM + 2][TILE_DIM + 2];
-	__shared__ double tempE[TILE_DIM + 2][TILE_DIM + 2];
-	__shared__ double tempE_prev[TILE_DIM + 2][TILE_DIM + 2];
-	
-	int RADIUS = 1;
+	// __shared__ double tempR[(TILE_DIM + 2)*(TILE_DIM + 2)];
+	__shared__ double tempE_prev[(TILE_DIM + 2)*(TILE_DIM + 2)];
+
+	size_t LocalWidth = TILE_DIM + 2;
+
 	// Global Indexing
-	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
-	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
-	int index = row * WIDTH + col;
-	
-	// Local or Shared Indexing
-	int l_row = threadIdx.y + RADIUS;
-	int l_col = threadIdx.x + RADIUS;
-	
+	size_t row = blockIdx.y * blockDim.y + threadIdx.y + 1;
+	size_t col = blockIdx.x * blockDim.x + threadIdx.x + 1;
+	size_t index = row * WIDTH + col;
+
+	size_t local_index = (threadIdx.y + 1)* LocalWidth + threadIdx.x + 1;
+
+	// copy all
 	if (row >= 1 && row <= m && col >= 1 && col <= n ){
-		tempR[l_row][l_col] = R_1D[index];
-		tempE_prev[l_row][l_col] = E_prev_1D[index];
+		tempE_prev[local_index] = E_prev_1D[index];
+	}
+	
+	// copy Right & Left 
+	if (threadIdx.x + 1 == TILE_DIM){
+		tempE_prev[local_index+1] = E_prev_1D[index+1];
+		tempE_prev[local_index-TILE_DIM] = E_prev_1D[index-TILE_DIM];
 	}
 
-	// copy left 
-	if (l_col == 1){
-		tempE_prev[l_row][l_col-1] = E_prev_1D[index-1];
+	// copy Up & Down
+	if (threadIdx.y + 1== TILE_DIM){
+		tempE_prev[local_index + LocalWidth] = E_prev_1D[index + WIDTH];
+		tempE_prev[local_index - TILE_DIM*LocalWidth] = E_prev_1D[index - TILE_DIM*WIDTH];
 	}
-
-	// copy Right 
-	if (l_col == TILE_DIM){
-		tempE_prev[l_row][l_col+1] = E_prev_1D[index+1];
-	}
-
-	// copy up
-	if (l_row == 1){
-		tempE_prev[l_row-1][l_col] = E_prev_1D[index - WIDTH];
-	}
-
-	// copy down
-	if (l_row == TILE_DIM){
-		tempE_prev[l_row+1][l_col] = E_prev_1D[index + WIDTH];
-	}
-
+	
 	// Make sure all threads get to this point before proceeding!
 	__syncthreads(); // This will syncronize threads in a block
 
 	if (row >= 1 && row <= m && col >= 1 && col <= n)
-	{	
-		// PDE v1
-		//tempE[l_row][l_col] = E_prev_1D[index] + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * E_prev_1D[index] + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
-
-		// PDE v2
-		tempE[l_row][l_col] = tempE_prev[l_row][l_col] + alpha * (tempE_prev[l_row][l_col + 1] + tempE_prev[l_row][l_col - 1] - 4 * tempE_prev[l_row][l_col] + tempE_prev[l_row + 1][l_col] + tempE_prev[l_row - 1][l_col]);
+	{
+		double e_temp;
+		double r_temp = R_1D[index];
 		
-		double e_temp = tempE[l_row][l_col];
-		double r_temp = tempR[l_row][l_col];
+		// PDE
+		e_temp = tempE_prev[local_index] + alpha * (tempE_prev[local_index + 1] + tempE_prev[local_index- 1] - 4 * tempE_prev[local_index] + tempE_prev[local_index + LocalWidth] + tempE_prev[local_index- LocalWidth]);
+		
 
 		//ODE
 		e_temp = e_temp - dt * (kk * e_temp * (e_temp - a) * (e_temp - 1) + e_temp * r_temp);
+		
 		r_temp = r_temp + dt * (epsilon + M1 * r_temp / (e_temp + M2)) * (-r_temp - kk * e_temp * (e_temp - b - 1));
 		
 		E_1D[index] = e_temp;
 		R_1D[index] = r_temp;
 	}
-
 }
 
-void simv1(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+void simv1(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
@@ -188,23 +185,36 @@ void simv1(const double alpha, const int n, const int m, const double kk, const 
 	// ============ PDE Kernel ====
 	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
 
-	simulate_version1_PDE<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-
-
+	// Start the timer
+	double t0 = getTime();
+	simulate_version1_PDE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaDeviceSynchronize();
 	
+	// end timer
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
+
 	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 
 	// ============ ODE Kernel =======
 	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
 
-	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	// Start the timer
+	t0 = getTime();
+
+	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaDeviceSynchronize();
+	
+	// end timer
+	time_elapsed = getTime() - t0;
+	*time += time_elapsed;
 
 	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
 
-void simv2(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+void simv2(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
@@ -215,15 +225,24 @@ void simv2(const double alpha, const int n, const int m, const double kk, const 
 	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
 
+		
 	// Kernel Launch
-	simulate_version2<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	
+	// Start the timer
+	double t0 = getTime();
+
+	simulate_version2<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaDeviceSynchronize();
+
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
 
 	// copy to Host
 	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
 
-void simv3(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+void simv3(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
@@ -234,15 +253,25 @@ void simv3(const double alpha, const int n, const int m, const double kk, const 
 	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
 
+		
 	// Kernel Launch
-	simulate_version3<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	
+	// Start the timer
+	double t0 = getTime();
+
+	simulate_version3<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaDeviceSynchronize();
+
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
 
 	// copy to Host
 	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
 
-void simv4(const double alpha, const int n, const int m, const double kk, const double dt, const double a, const double epsilon, const double M1, const double M2, const double b, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+
+void simv4(const double alpha, const int n, const int m,  const double dt, double *E_1D, double *E_prev_1D, double *R_1D, int WIDTH, double* time, int T_DIM, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
 {
 	const dim3 block_size(TILE_DIM, TILE_DIM);
 	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
@@ -253,11 +282,21 @@ void simv4(const double alpha, const int n, const int m, const double kk, const 
 	cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
 
+		
 	// Kernel Launch
-	simulate_version4<<<num_blocks, block_size>>>(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	
+	// Start the timer
+	double t0 = getTime();
+	
+	simulate_version4<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaStreamSynchronize(0);
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
+	
 
 	// copy to Host
 	cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	
 	cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
 
@@ -274,12 +313,6 @@ int main(int argc, char **argv)
 	*      and is used in time integration
 	*/
 
-	// cout<< "\n Hello I am waris"<<endl;
-	int devId = 0;
-	cudaDeviceProp prop;
-	cudaGetDeviceProperties(&prop, devId);
-	printf("\nDevice : %s\n", prop.name);
-
 	// For Serial Version
 	double **E, **R, **E_prev;
 	// For Host and GPU 
@@ -287,18 +320,21 @@ int main(int argc, char **argv)
 	double *d_E_1D, *d_E_prev_1D, *d_R_1D;
 
 	// Various constants - these definitions shouldn't change
-	const double a = 0.1, b = 0.1, kk = 8.0, M1 = 0.07, M2 = 0.3, epsilon = 0.01, d = 5e-5;
 
 	double T = 1000.0;
 	int m = 200, n = 200;
 	int plot_freq = 0;
 	int px = 1, py = 1;
 	int no_comm = 0;
-	int num_threads = 1;
+	int version = 4;
 	int WIDTH;
+	double time_elapsed = 0.0;
+	
+	// int version = 4;
 
-	cmdLine(argc, argv, T, n, px, py, plot_freq, no_comm, num_threads);
+	cmdLine(argc, argv, T, n, px, py, plot_freq, no_comm, version);
 	m = n;
+	
 	// Allocate contiguous memory for solution arrays
 	// The computational box is defined on [1:m+1,1:n+1]
 	// We pad the arrays in order to facilitate differencing on the
@@ -365,7 +401,14 @@ int main(int argc, char **argv)
 	double dtr = 1 / (epsilon + ((M1 / M2) * rp));
 	double dt = (dte < dtr) ? 0.95 * dte : 0.95 * dtr;
 	double alpha = d * dt / (dx * dx);
+	int devId = 0;
+	cudaDeviceProp prop;
+	cudaGetDeviceProperties(&prop, devId);
 
+
+	printf("\n    ******** Device : %s **********\n", prop.name);
+	cout << "Simulation Version          : " << version<<endl;
+	cout << "Block Size      :"<< TILE_DIM <<endl;
 	cout << "Grid Size       : " << n << endl;
 	cout << "Duration of Sim : " << T << endl;
 	cout << "Time step dt    : " << dt << endl;
@@ -379,7 +422,7 @@ int main(int argc, char **argv)
 	cout << endl;
 
 	// Start the timer
-	double t0 = getTime();
+	//double t0 = getTime();
 
 	// Simulated time is different from the integer timestep number
 	// Simulated time
@@ -387,7 +430,7 @@ int main(int argc, char **argv)
 	// Integer timestep number
 	int niter = 0;
 	
-	int version = 4;
+	
 
 	while (t < T)
 	{
@@ -398,19 +441,20 @@ int main(int argc, char **argv)
 		mirrorBoundries(E_prev_1D, n, m, WIDTH);
 
 		switch (version){
-
-				// Size of the computational box
 			case 1:
-				simv1(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, E_1D, E_prev_1D, R_1D, 	WIDTH, d_E_1D, d_E_prev_1D, d_R_1D);
+				simv1(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 2:
-				simv2(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, E_1D, E_prev_1D, R_1D, 	WIDTH, d_E_1D, d_E_prev_1D, d_R_1D);
+				simv2(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 3:
-				simv3(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, E_1D, E_prev_1D, R_1D, 	WIDTH, d_E_1D, d_E_prev_1D, d_R_1D);
+				simv3(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 4:
-				simv4(alpha, n, m, kk, dt, a, epsilon, M1, M2, b, E_1D, E_prev_1D, R_1D, 	WIDTH, d_E_1D, d_E_prev_1D, d_R_1D);
+				simv4(alpha, n, m,  dt, E_1D, E_prev_1D, R_1D, WIDTH, &time_elapsed, TILE_DIM, d_E_1D, d_E_prev_1D, d_R_1D);
+				break;
+			case 0:
+			cout<<"\n Implement the Serial Version"<<endl;		
 				break;
 			default:
 				cout<<"\nPlease Enter the Correct version"<<endl;
@@ -430,12 +474,10 @@ int main(int argc, char **argv)
 
 	} //end of while loop
 
-	double time_elapsed = getTime() - t0;
+	//double time_elapsed = getTime() - t0;
 
 	double Gflops = (double)(niter * (1E-9 * n * n) * 28.0) / time_elapsed;
 	double BW = (double)(niter * 1E-9 * (n * n * sizeof(double) * 4.0)) / time_elapsed;
-
-	cout << "Simulation Version          : " << version<<endl;
 	cout << "Number of Iterations        : " << niter << endl;
 	cout << "Elapsed Time (sec)          : " << time_elapsed << endl;
 	cout << "Sustained Gflops Rate       : " << Gflops << endl;
