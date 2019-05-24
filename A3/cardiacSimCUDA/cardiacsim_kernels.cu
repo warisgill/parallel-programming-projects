@@ -22,7 +22,7 @@
 #include <getopt.h>
 using namespace std;
 
-#define TILE_DIM 16
+#define TILE_DIM 32
 #define kk  8.0  
 #define a 0.1 
 #define epsilon 0.01 
@@ -207,6 +207,8 @@ int main(int argc, char **argv)
 
 		//mirrorBoundries(E_prev_1D, n, m, WIDTH);
 		//mirrorBoundries(E_prev_1D, d_E_prev_1D,n, m, WIDTH);
+		
+
 		mirrorkernel<<<num_blocks, block_size>>>(d_E_prev_1D, n, m ,WIDTH);
 		cudaStreamSynchronize(0);
 		//cudaMemcpy(E_prev_1D, d_E_prev_1D, Total_Bytes, cudaMemcpyDeviceToHost);
@@ -250,7 +252,7 @@ int main(int argc, char **argv)
 
 	} //end of while loop
 
-	cudaMemcpy(E_prev_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
+	cudaMemcpy(E_prev_1D, d_E_prev_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 	
 	//double time_elapsed = getTime() - t0;
 
