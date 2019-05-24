@@ -47,244 +47,21 @@ void mirrorBoundries(double *E_prev_1D, double* d_E_prev_1D, const int n, const 
 	These values should not vary (except to within roundoff)
  	when we use different numbers of  processes to solve the problem
 */
+
 double stats(double **E, int m, int n, double *_mx);
 double stats1D(double *E, int m, int n, double *_mx, int WIDTH);
 
 
-// // ============================== Kernels  ===========================
-__global__ void simulate_version1_PDE(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
-{
-
-	int RADIUS = 1;
-	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
-	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
-
-	if (row >= 1 && row <= m && col >= 1 && col <= n)
-	{
-		E_1D[row * WIDTH + col] = E_prev_1D[row * WIDTH + col] + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * E_prev_1D[row * WIDTH + col] + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
-	}
-}
-
-__global__ void simulate_version1_ODE(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
-{
-	int RADIUS = 1;
-	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
-	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
-	int index = row * WIDTH + col;
-
-	if (row >= 1 && row <= m && col >= 1 && col <= n)
-	{
-		E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
-		R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
-	}
-}
-
-__global__ void simulate_version2(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
-{
-	int RADIUS = 1;
-	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
-	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
-
-	int index = row * WIDTH + col;
-
-	if (row >= 1 && row <= m && col >= 1 && col <= n)
-	{
-
-		// PDE
-		E_1D[row * WIDTH + col] = E_prev_1D[row * WIDTH + col] + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * E_prev_1D[row * WIDTH + col] + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
-
-		//ODE
-		E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
-		R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
-	}
-}
-
-__global__ void simulate_version3(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
-{
-	int RADIUS = 1;
-	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
-	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
-	int index = row * WIDTH + col;
-
-	if (row >= 1 && row <= m && col >= 1 && col <= n)
-	{
-		// PDE
-		E_1D[row * WIDTH + col] = E_prev_1D[row * WIDTH + col] + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * E_prev_1D[row * WIDTH + col] + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
-
-		double e_temp = E_1D[index];
-		double r_temp = R_1D[index];
-
-		//ODE
-		e_temp = e_temp - dt * (kk * e_temp * (e_temp - a) * (e_temp - 1) + e_temp * r_temp);
-		r_temp = r_temp + dt * (epsilon + M1 * r_temp / (e_temp + M2)) * (-r_temp - kk * e_temp * (e_temp - b - 1));
-
-		E_1D[index] = e_temp;
-		R_1D[index] = r_temp;
-	}
-}
+// ============================== Kernels  ===========================
+__global__ void mirrorkernel(double *E_prev_1D, const int n, const int m, const int WIDTH);
+void simV1(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D);
+void simV2(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D);
+void simV3(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D);
+void simV4(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D);
+void simV5(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D);
+// ============================= Exp 1= ===============
 
 
-__global__ void simulate_version4(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
-{
-	// __shared__ double tempR[(TILE_DIM + 2)*(TILE_DIM + 2)];
-	__shared__ double tempE_prev[(TILE_DIM + 2)*(TILE_DIM + 2)];
-
-	size_t LocalWidth = TILE_DIM + 2;
-
-	// Global Indexing
-	size_t row = blockIdx.y * blockDim.y + threadIdx.y + 1;
-	size_t col = blockIdx.x * blockDim.x + threadIdx.x + 1;
-	size_t index = row * WIDTH + col;
-
-	size_t local_index = (threadIdx.y + 1)* LocalWidth + threadIdx.x + 1;
-
-	// copy all
-	if (row >= 1 && row <= m && col >= 1 && col <= n ){
-		tempE_prev[local_index] = E_prev_1D[index];
-	}
-	
-	// copy Right & Left 
-	if (threadIdx.x + 1 == TILE_DIM){
-		tempE_prev[local_index+1] = E_prev_1D[index+1];
-		tempE_prev[local_index-TILE_DIM] = E_prev_1D[index-TILE_DIM];
-	}
-
-	// copy Up & Down
-	if (threadIdx.y + 1== TILE_DIM){
-		tempE_prev[local_index + LocalWidth] = E_prev_1D[index + WIDTH];
-		tempE_prev[local_index - TILE_DIM*LocalWidth] = E_prev_1D[index - TILE_DIM*WIDTH];
-	}
-	
-	// Make sure all threads get to this point before proceeding!
-	__syncthreads(); // This will syncronize threads in a block
-
-	if (row >= 1 && row <= m && col >= 1 && col <= n)
-	{
-		double e_temp;
-		double r_temp = R_1D[index];
-		
-		// PDE
-		e_temp = tempE_prev[local_index] + alpha * (tempE_prev[local_index + 1] + tempE_prev[local_index- 1] - 4 * tempE_prev[local_index] + tempE_prev[local_index + LocalWidth] + tempE_prev[local_index- LocalWidth]);
-		
-
-		//ODE
-		e_temp = e_temp - dt * (kk * e_temp * (e_temp - a) * (e_temp - 1) + e_temp * r_temp);
-		
-		r_temp = r_temp + dt * (epsilon + M1 * r_temp / (e_temp + M2)) * (-r_temp - kk * e_temp * (e_temp - b - 1));
-		
-		E_1D[index] = e_temp;
-		R_1D[index] = r_temp;
-	}
-}
-
-void simv1(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
-{
-	const dim3 block_size(TILE_DIM, TILE_DIM);
-	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-	//int Total_Bytes = WIDTH * WIDTH * sizeof(double);
-
-	// ============ PDE Kernel ====
-	//cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
-
-	// Start the timer
-	double t0 = getTime();
-	simulate_version1_PDE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	//cudaDeviceSynchronize();
-	
-	// end timer
-	//double time_elapsed = getTime() - t0;
-	//*time += time_elapsed;
-
-	//cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
-
-	// ============ ODE Kernel =======
-	//cudaMemcpy(d_E_1D, E_1D, Total_Bytes, cudaMemcpyHostToDevice);
-	//cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
-
-	// Start the timer
-	//t0 = getTime();
-
-	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaStreamSynchronize(0);
-	
-	// end timer
-	double time_elapsed = getTime() - t0;
-	*time += time_elapsed;
-
-	// cudaMemcpy(E_1D, d_E_1D, Total_Bytes, cudaMemcpyDeviceToHost);
-	// cudaMemcpy(R_1D, d_R_1D, Total_Bytes, cudaMemcpyDeviceToHost);
-}
-
-void simv2(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
-{
-	const dim3 block_size(TILE_DIM, TILE_DIM);
-	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-	
-	// Start the timer
-	double t0 = getTime();
-
-	simulate_version2<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaStreamSynchronize(0);
-
-	double time_elapsed = getTime() - t0;
-	*time += time_elapsed;
-}
-
-void simv3(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
-{
-	const dim3 block_size(TILE_DIM, TILE_DIM);
-	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-		
-	// Start the timer
-	double t0 = getTime();
-
-	simulate_version3<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaStreamSynchronize(0);
-	double time_elapsed = getTime() - t0;
-	*time += time_elapsed;
-
-}
-
-
-void simv4(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
-{
-	const dim3 block_size(TILE_DIM, TILE_DIM);
-	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
-	
-	// Start the timer
-	double t0 = getTime();
-	
-	simulate_version4<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
-	cudaStreamSynchronize(0);
-	double time_elapsed = getTime() - t0;
-	*time += time_elapsed;
-	
-}
-
-__global__ void mirrorkernel(double *E_prev_1D, const int n, const int m, const int WIDTH){
-
-	/* 
-	* Copy data from boundary of the computational box 
-	* to the padding region, set up for differencing
-	* on the boundary of the computational box
-	* Using mirror boundaries
-	*/
-
-	//int col, row;
-	size_t row = blockIdx.y * blockDim.y + threadIdx.y + 1;
-	size_t col = blockIdx.x * blockDim.x + threadIdx.x + 1;
-	
-	if (row <= m) {
-		E_prev_1D[row * WIDTH + 0] = E_prev_1D[row * WIDTH + 2];
-		E_prev_1D[row * WIDTH + (n + 1)] = E_prev_1D[row * WIDTH + (n - 1)];
-	}
-	
-	if (col <= n) {
-
-		E_prev_1D[0 * WIDTH + col] = E_prev_1D[2 * WIDTH + col];
-		E_prev_1D[(m + 1) * WIDTH + col] = E_prev_1D[(m - 1) * WIDTH + col];
-	}
-}
 
 // Main Refined -- Versioin 4 Refined --
 
@@ -404,7 +181,6 @@ int main(int argc, char **argv)
 	{
 		cout << "Communication   : DISABLED" << endl;
 	}
-
 	cout << endl;
 
 	// Start the timer
@@ -421,6 +197,8 @@ int main(int argc, char **argv)
 	cudaMemcpy(d_R_1D, R_1D, Total_Bytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_E_prev_1D, E_prev_1D, Total_Bytes, cudaMemcpyHostToDevice);
 	// very well done
+	//simV5(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
+
 	while (t < T)
 	{
 
@@ -434,20 +212,23 @@ int main(int argc, char **argv)
 		//cudaMemcpy(E_prev_1D, d_E_prev_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 		switch (version){
 			case 1:
-				simv1(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
+				simV1(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 2:
-				simv2(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
+				simV2(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 3:
-				simv3(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
+				simV3(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
 			case 4:
 				
-				simv4(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
-				
+				simV4(alpha, n, m,  dt, WIDTH, &time_elapsed, d_E_1D, d_E_prev_1D, d_R_1D);
 				break;
+			// case 5:	
+				
+			// 	break;
 			case 0:
+
 			cout<<"\n Implement the Serial Version"<<endl;		
 				break;
 			default:
@@ -502,9 +283,295 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+// ************************************************ Kernels Start ***************************************
+__global__ void mirrorkernel(double *E_prev_1D, const int n, const int m, const int WIDTH){
+
+	/* 
+	* Copy data from boundary of the computational box 
+	* to the padding region, set up for differencing
+	* on the boundary of the computational box
+	* Using mirror boundaries
+	*/
+
+	//int col, row;
+	size_t row = blockIdx.y * blockDim.y + threadIdx.y + 1;
+	size_t col = blockIdx.x * blockDim.x + threadIdx.x + 1;
+	
+	if (row <= m) {
+		E_prev_1D[row * WIDTH + 0] = E_prev_1D[row * WIDTH + 2];
+		E_prev_1D[row * WIDTH + (n + 1)] = E_prev_1D[row * WIDTH + (n - 1)];
+	}
+	
+	if (col <= n) {
+
+		E_prev_1D[0 * WIDTH + col] = E_prev_1D[2 * WIDTH + col];
+		E_prev_1D[(m + 1) * WIDTH + col] = E_prev_1D[(m - 1) * WIDTH + col];
+	}
+}
+__global__ void simulate_version1_PDE(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
+{
+
+	int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+
+	if (row >= 1 && row <= m && col >= 1 && col <= n)
+	{
+		E_1D[row * WIDTH + col] = E_prev_1D[row * WIDTH + col] + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * E_prev_1D[row * WIDTH + col] + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+	}
+}
+
+__global__ void simulate_version1_ODE(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
+{
+	int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+	int index = row * WIDTH + col;
+
+	if (row >= 1 && row <= m && col >= 1 && col <= n)
+	{
+		E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
+		R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
+	}
+}
+
+// checkpoint 2
+__global__ void simulate_version2(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
+{
+	int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+
+	int index = row * WIDTH + col;
+
+	if (row >= 1 && row <= m && col >= 1 && col <= n)
+	{
+
+		// PDE
+		E_1D[row * WIDTH + col] = E_prev_1D[row * WIDTH + col] + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * E_prev_1D[row * WIDTH + col] + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+
+		//ODE
+		E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
+		R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
+	}
+}
+
+// checkpoint 1
+__global__ void simulate_version3(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
+{
+	//int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + 1;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + 1;
+	int index = row * WIDTH + col;
+
+	if (row >= 1 && row <= m && col >= 1 && col <= n)
+	{
+		double e_temp; //= E_1D[index];
+		double r_temp = R_1D[index];
+		double e_prev_temp = E_prev_1D[index];
+
+		// PDE
+		e_temp = e_prev_temp + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * e_prev_temp + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+
+		//ODE
+		e_temp = e_temp - dt * (kk * e_temp * (e_temp - a) * (e_temp - 1) + e_temp * r_temp);
+		r_temp = r_temp + dt * (epsilon + M1 * r_temp / (e_temp + M2)) * (-r_temp - kk * e_temp * (e_temp - b - 1));
+
+		E_1D[index] = e_temp;
+		R_1D[index] = r_temp;
+	}
+}
+
+
+__global__ void simulate_version4(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
+{
+	// __shared__ double tempR[(TILE_DIM + 2)*(TILE_DIM + 2)];
+	__shared__ double tempE_prev[(TILE_DIM + 2)*(TILE_DIM + 2)];
+
+	size_t LocalWidth = TILE_DIM + 2;
+
+	// Global Indexing
+	size_t row = blockIdx.y * blockDim.y + threadIdx.y + 1;
+	size_t col = blockIdx.x * blockDim.x + threadIdx.x + 1;
+	size_t index = row * WIDTH + col;
+
+	size_t local_index = (threadIdx.y + 1)* LocalWidth + threadIdx.x + 1;
+
+	// copy all
+	if (row >= 1 && row <= m && col >= 1 && col <= n ){
+		tempE_prev[local_index] = E_prev_1D[index];
+	}
+	
+	// copy Right & Left 
+	if (threadIdx.x + 1 == TILE_DIM){
+		tempE_prev[local_index+1] = E_prev_1D[index+1];
+		tempE_prev[local_index-TILE_DIM] = E_prev_1D[index-TILE_DIM];
+	}
+
+	// copy Up & Down
+	if (threadIdx.y + 1== TILE_DIM){
+		tempE_prev[local_index + LocalWidth] = E_prev_1D[index + WIDTH];
+		tempE_prev[local_index - TILE_DIM*LocalWidth] = E_prev_1D[index - TILE_DIM*WIDTH];
+	}
+	
+	// Make sure all threads get to this point before proceeding!
+	__syncthreads(); // This will syncronize threads in a block
+
+	if (row >= 1 && row <= m && col >= 1 && col <= n)
+	{
+		double e_temp;
+		double r_temp = R_1D[index];
+		
+		// PDE
+		e_temp = tempE_prev[local_index] + alpha * (tempE_prev[local_index + 1] + tempE_prev[local_index- 1] - 4 * tempE_prev[local_index] + tempE_prev[local_index + LocalWidth] + tempE_prev[local_index- LocalWidth]);
+
+		//ODE
+		e_temp = e_temp - dt * (kk * e_temp * (e_temp - a) * (e_temp - 1) + e_temp * r_temp);
+		r_temp = r_temp + dt * (epsilon + M1 * r_temp / (e_temp + M2)) * (-r_temp - kk * e_temp * (e_temp - b - 1));
+		
+		E_1D[index] = e_temp;
+		R_1D[index] = r_temp;
+	}
+}
+
+void simV1(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+{
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	
+	// Start the timer
+	double t0 = getTime();
+	simulate_version1_PDE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	simulate_version1_ODE<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaStreamSynchronize(0);
+	
+	// end timer
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
+}
+
+void simV2(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+{
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	
+	// Start the timer
+	double t0 = getTime();
+
+	simulate_version2<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaStreamSynchronize(0);
+
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
+}
+
+void simV3(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+{
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+		
+	// Start the timer
+	double t0 = getTime();
+
+	simulate_version3<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaStreamSynchronize(0);
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
+
+}
+
+
+void simV4(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+{
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	
+	// Start the timer
+	double t0 = getTime();
+	
+	simulate_version4<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaStreamSynchronize(0);
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
+	
+}
+
+//************************************************* Kernels End *****************************************
+
+
+// --------------------------------------------- Optimaztion Start-------------------------------------------------
+__global__ void simulate_version5(const double alpha, const int n, const int m, const double dt,  double *E_1D, double *E_prev_1D, double *R_1D, const int WIDTH)
+{
+	int RADIUS = 1;
+	int row = blockIdx.y * blockDim.y + threadIdx.y + RADIUS;
+	int col = blockIdx.x * blockDim.x + threadIdx.x + RADIUS;
+
+	int index = row * WIDTH + col;
+	double t  = 0.0;
+	int niter = 0;
+	double T = 1000.0;
+
+	while (t < T) {
+		t += dt;
+		niter++;
+
+		if (row <= m) {
+			E_prev_1D[row * WIDTH + 0] = E_prev_1D[row * WIDTH + 2];
+			E_prev_1D[row * WIDTH + (n + 1)] = E_prev_1D[row * WIDTH + (n - 1)];
+		}
+		
+		if (col <= n) {
+	
+			E_prev_1D[0 * WIDTH + col] = E_prev_1D[2 * WIDTH + col];
+			E_prev_1D[(m + 1) * WIDTH + col] = E_prev_1D[(m - 1) * WIDTH + col];
+		}
+		
+		__syncthreads();
+
+		if (row >= 1 && row <= m && col >= 1 && col <= n)
+		{
+
+			// PDE
+			E_1D[row * WIDTH + col] = E_prev_1D[row * WIDTH + col] + alpha * (E_prev_1D[row * WIDTH + (col + 1)] + E_prev_1D[row * WIDTH + (col - 1)] - 4 * E_prev_1D[row * WIDTH + col] + E_prev_1D[(row + 1) * WIDTH + col] + E_prev_1D[(row - 1) * WIDTH + col]);
+
+			//ODE
+			E_1D[index] = E_1D[index] - dt * (kk * E_1D[index] * (E_1D[index] - a) * (E_1D[index] - 1) + E_1D[index] * R_1D[index]);
+			R_1D[index] = R_1D[index] + dt * (epsilon + M1 * R_1D[index] / (E_1D[index] + M2)) * (-R_1D[index] - kk * E_1D[index] * (E_1D[index] - b - 1));
+			
+			// double *tmp2 = E_1D;
+			// E_1D = E_prev_1D;
+			// E_prev_1D = tmp2;
+			E_prev_1D[index] = E_1D[index];
+		}
+
+		//E_prev_1D[index] = E_1D[index];
+		//if (row == 1 && col == 1) {
+			//double *tmp2 = E_1D;
+			//E_1D = E_prev_1D;
+			//E_prev_1D = tmp2;
+		//}
+		__syncthreads();
+	}
+
+}
+
+void simV5(const double alpha, const int n, const int m,  const double dt,  int WIDTH, double* time, double *d_E_1D, double *d_E_prev_1D, double *d_R_1D)
+{
+	const dim3 block_size(TILE_DIM, TILE_DIM);
+	const dim3 num_blocks(WIDTH / block_size.x, WIDTH / block_size.y);
+	
+	// Start the timer
+	double t0 = getTime();
+
+	simulate_version5<<<num_blocks, block_size>>>(alpha, n, m, dt, d_E_1D, d_E_prev_1D, d_R_1D, WIDTH);
+	cudaStreamSynchronize(0);
+
+	double time_elapsed = getTime() - t0;
+	*time += time_elapsed;
+}
+// --------------------------------------------- Optimation End -------------------------------------------------
+
 //================================================== Utilities =========================================
-
-
 
 // Mirror Ghost Boundries
 void mirrorBoundries(double *E_prev_1D, double* d_E_prev_1D, const int n, const int m, const int WIDTH){
@@ -522,8 +589,6 @@ void mirrorBoundries(double *E_prev_1D, double* d_E_prev_1D, const int n, const 
 				
 	cudaMemcpy(E_prev_1D, d_E_prev_1D, Total_Bytes, cudaMemcpyDeviceToHost);
 }
-
-
 
 // Mirror Ghost Boundries
 void mirrorBoundries(double *E_prev_1D, const int n, const int m, const int WIDTH)
@@ -638,7 +703,6 @@ double getTime()
 
 	return (((double)TV.tv_sec) + kMicro * ((double)TV.tv_usec));
 }
-
 
 void cmdLine(int argc, char *argv[], double &T, int &n, int &px, int &py, int &plot_freq, int &no_comm, int &num_threads)
 {
